@@ -1,6 +1,8 @@
 name: flutter_rtmp_streamer_example
 description: Demonstrates how to use the flutter_rtmp_streamer plugin.
 
+version: 0.0.1+1
+
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -22,6 +24,9 @@ dependencies:
   equatable: ^2.0.0
   flutter_bloc: ^7.0.0
   permission_handler: ^8.3.0
+  shared_preferences: ^2.0.6
+  unicons: ^2.0.1
+
 
 
   flutter_rtmp_streamer:

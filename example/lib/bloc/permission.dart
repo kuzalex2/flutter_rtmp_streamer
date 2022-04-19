@@ -3,6 +3,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum MyPermissionStatus {
   unknown,
@@ -16,19 +17,17 @@ enum MyPermissionStatus {
 
 extension MyPermissionStatusGetters on MyPermissionStatus {
 
+
   bool get isUnknown => this == MyPermissionStatus.unknown;
 
   bool get isUndetermined => this == MyPermissionStatus.undetermined;
 
-  bool get isDenied => this == MyPermissionStatus.denied;
+  bool get isDenied => this == MyPermissionStatus.denied  || this == MyPermissionStatus.permanentlyDenied || this == MyPermissionStatus.restricted;
 
-  bool get isGranted => this == MyPermissionStatus.granted;
+  bool get isGranted => this == MyPermissionStatus.granted || this == MyPermissionStatus.limited;
 
-  bool get isRestricted => this == MyPermissionStatus.restricted;
-
-  bool get isPermanentlyDenied => this == MyPermissionStatus.permanentlyDenied;
-
-  bool get isLimited => this == MyPermissionStatus.limited;
+  // bool get isRestricted => this == MyPermissionStatus.restricted;
+  // bool get isLimited => this == MyPermissionStatus.limited;
 
   static MyPermissionStatus create(PermissionStatus status){
     switch(status){
@@ -46,35 +45,25 @@ class PermissionState extends Equatable {
 
   final MyPermissionStatus camStatus;
   final MyPermissionStatus micStatus;
-  final bool isPermissionStatusKnown;
-
-  bool get isPermissionStatusUnknown => !isPermissionStatusKnown;
-
-  bool get allPermissionsAreGranted => camStatus.isGranted && micStatus.isGranted;
-  bool get allPermissionsAreNotGranted => !allPermissionsAreGranted;
 
   const PermissionState( {
     required this.camStatus,
     required this.micStatus,
-    required this.isPermissionStatusKnown,
   });
 
   static const unknown = PermissionState(
-      micStatus: PermissionStatus.denied,
-      camStatus: PermissionStatus.denied,
-      isPermissionStatusKnown: false
+      micStatus: MyPermissionStatus.unknown,
+      camStatus:  MyPermissionStatus.unknown,
   );
 
   PermissionState copyWith({
-    PermissionStatus? camStatus,
-    PermissionStatus? micStatus,
-    bool? isPermissionStatusKnown,
+    MyPermissionStatus? camStatus,
+    MyPermissionStatus? micStatus,
 
   }) {
     return PermissionState(
       camStatus: camStatus ?? this.camStatus,
       micStatus: micStatus ?? this.micStatus,
-      isPermissionStatusKnown: isPermissionStatusKnown ?? this.isPermissionStatusKnown,
     );
   }
 
@@ -82,16 +71,87 @@ class PermissionState extends Equatable {
   List<Object> get props => [
     camStatus,
     micStatus,
-    isPermissionStatusKnown,
+    // isPermissionStatusKnown,
   ];
 }
 
+class _SharedPrefs {
 
-class PermissionCubit extends Cubit<PermissionState> {
+  late final SharedPreferences _prefs;
+
+  ///
+  ///
+  /// isMicPermissionKnown/isCamPermissionKnown
+  ///
+
+  bool get isMicPermissionKnown => _prefs.getBool("isMicPermissionKnown") ?? false;
+
+  set isMicPermissionKnown(bool value)  {
+    _prefs.setBool("isMicPermissionKnown", value);
+  }
+
+  bool get isCamPermissionKnown => _prefs.getBool("isCamPermissionKnown") ?? false;
+
+  set isCamPermissionKnown(bool value)  {
+    _prefs.setBool("isCamPermissionKnown", value);
+  }
+}
+
+
+class PermissionCubit extends Cubit<PermissionState> with _SharedPrefs {
+
+
+
 
   PermissionCubit({required PermissionState permissionState}) : super(permissionState)
   {
+    _init();
+  }
 
+  _init() async {
+    _prefs = await SharedPreferences.getInstance();
+
+    await Future.delayed(const Duration(milliseconds: 400));
+
+    if (isMicPermissionKnown) {
+      Permission.microphone.status.then((value) {
+        emit(state.copyWith(
+            micStatus: MyPermissionStatusGetters.create(value)));
+        isMicPermissionKnown = true;
+      });
+    } else {
+      emit(state.copyWith(micStatus: MyPermissionStatus.undetermined));
+    }
+
+    if (isCamPermissionKnown) {
+      Permission.camera.status.then((value) {
+        emit(state.copyWith(
+            camStatus: MyPermissionStatusGetters.create(value)));
+        isCamPermissionKnown = true;
+      });
+    } else {
+      emit(state.copyWith(camStatus: MyPermissionStatus.undetermined));
+    }
+  }
+
+  Future<void> requestCamPermission() async {
+
+    if (state.camStatus.isUndetermined) {
+      final value = await Permission.camera.request();
+
+      isCamPermissionKnown=true;
+      emit(state.copyWith(camStatus: MyPermissionStatusGetters.create(value)));
+    }
+
+  }
+
+  Future<void> requestMicPermission() async {
+    if (state.micStatus.isUndetermined) {
+      final value = await Permission.microphone.request();
+
+      isMicPermissionKnown=true;
+      emit(state.copyWith(micStatus: MyPermissionStatusGetters.create(value)));
+    }
   }
 
 }

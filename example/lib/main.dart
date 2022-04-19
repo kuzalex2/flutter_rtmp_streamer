@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rtmp_streamer_example/screens/loader.dart';
-import 'package:flutter_rtmp_streamer_example/screens/permission_denied.dart';
+import 'package:flutter_rtmp_streamer_example/screens/permissions/permission_screen.dart';
 
 import 'bloc/permission.dart';
 
@@ -29,11 +29,12 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
 
-        theme: ThemeData(
-          brightness: Brightness.light,
-        ),
+
         darkTheme: ThemeData(
           brightness: Brightness.dark,
+          textTheme: const TextTheme(
+              bodyText1: TextStyle(fontSize: 16.0),
+          ),
         ),
         themeMode: ThemeMode.dark,
 
@@ -55,17 +56,15 @@ class MainScreen extends StatelessWidget {
       body: BlocBuilder<PermissionCubit, PermissionState>(
         builder: (context, state) {
 
-          return const PermissionDeniedScreen();
-
-          if (state.isPermissionStatusUnknown) {
+          if (state.micStatus.isUnknown || state.camStatus.isUnknown) {
             return const Loader();
           }
 
-          if (state.allPermissionsAreNotGranted){
-            return const PermissionDeniedScreen(/*micStatus: state.micStatus, camStatus: styate.camStatus*/);
+          if (state.micStatus.isGranted && state.camStatus.isGranted){
+            return const CameraScreen();
           }
 
-          return const CameraScreen();
+          return PermissionsScreen(permissionState: state,);
         }
       ),
 
