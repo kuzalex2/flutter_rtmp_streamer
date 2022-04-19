@@ -30,7 +30,8 @@ class PermissionButton extends StatelessWidget {
 
       return _Button(
         label: '✓ $label',
-        onPressed: onPressed,
+        backgroudColor: Colors.green,
+        onPressed: null,
       );
 
     }
@@ -47,11 +48,13 @@ class _Button extends StatelessWidget {
 
   final String label;
   final VoidCallback? onPressed;
+  final Color? backgroudColor;
 
   const _Button({
     Key? key,
     required this.label,
     required this.onPressed,
+    this.backgroudColor,
   }) : super(key: key);
 
   @override
@@ -61,6 +64,7 @@ class _Button extends StatelessWidget {
 
     return ElevatedButton(
       style: ButtonStyle(
+        backgroundColor: backgroudColor!=null ? MaterialStateProperty.all(backgroudColor) : null,
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
               RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.0),
