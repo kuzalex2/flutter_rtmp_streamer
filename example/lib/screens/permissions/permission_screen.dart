@@ -79,21 +79,25 @@ class PermissionsScreen extends StatelessWidget {
 
 
               const SizedBox(height: 24),
-              Column(
-                children: [
-                  PermissionButton(
-                    label:  "Enable camera",
-                    permissionStatus: permissionState.camStatus,
-                    onPressed: context.read<PermissionCubit>().requestCamPermission
-                  ),
-                  const SizedBox(height: 24),
-                  PermissionButton(
-                    label:  "Enable microphone",
-                    permissionStatus: permissionState.micStatus,
-                    onPressed: context.read<PermissionCubit>().requestMicPermission
-                  ),
-                  const SizedBox(height: 8),
-                ],
+              Visibility(
+                visible: permissionState.camStatus.isUndetermined || permissionState.micStatus.isUndetermined,
+                replacement: const SizedBox(height: 40),
+                child: Column(
+                  children: [
+                    PermissionButton(
+                      label:  "Enable camera",
+                      permissionStatus: permissionState.camStatus,
+                      onPressed: context.read<PermissionCubit>().requestCamPermission
+                    ),
+                    const SizedBox(height: 24),
+                    PermissionButton(
+                      label:  "Enable microphone",
+                      permissionStatus: permissionState.micStatus,
+                      onPressed: context.read<PermissionCubit>().requestMicPermission
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
               ),
             ],
           ),

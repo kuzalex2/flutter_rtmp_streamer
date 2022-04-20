@@ -14,8 +14,6 @@ void main() {
 }
 
 
-
-
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -28,7 +26,6 @@ class MyApp extends StatelessWidget {
         )
       ],
       child: MaterialApp(
-
 
         darkTheme: ThemeData(
           brightness: Brightness.dark,
@@ -79,7 +76,8 @@ class CameraScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    final textTheme = Theme.of(context).textTheme;
+    return Center(child: Text("Camera here", style: textTheme.bodyText1,),);
   }
 }
 

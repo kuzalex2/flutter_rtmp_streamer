@@ -2,8 +2,11 @@
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io' show Platform;
+
 
 enum MyPermissionStatus {
   unknown,
@@ -77,39 +80,64 @@ class PermissionState extends Equatable {
 
 class _SharedPrefs {
 
-  late final SharedPreferences _prefs;
+  SharedPreferences? _prefs;
 
   ///
   ///
   /// isMicPermissionKnown/isCamPermissionKnown
   ///
 
-  bool get isMicPermissionKnown => _prefs.getBool("isMicPermissionKnown") ?? false;
+  bool get isMicPermissionKnown => _prefs?.getBool("isMicPermissionKnown") ?? false;
 
   set isMicPermissionKnown(bool value)  {
-    _prefs.setBool("isMicPermissionKnown", value);
+    _prefs?.setBool("isMicPermissionKnown", value);
   }
 
-  bool get isCamPermissionKnown => _prefs.getBool("isCamPermissionKnown") ?? false;
+  bool get isCamPermissionKnown => _prefs?.getBool("isCamPermissionKnown") ?? false;
 
   set isCamPermissionKnown(bool value)  {
-    _prefs.setBool("isCamPermissionKnown", value);
+    _prefs?.setBool("isCamPermissionKnown", value);
   }
 }
 
 
-class PermissionCubit extends Cubit<PermissionState> with _SharedPrefs {
+class PermissionCubit extends Cubit<PermissionState> with _SharedPrefs, WidgetsBindingObserver {
 
-
-
+  AppLifecycleState? _prevState;
 
   PermissionCubit({required PermissionState permissionState}) : super(permissionState)
   {
+    WidgetsBinding.instance?.addObserver(this);
     _init();
   }
 
+  @override
+  Future<void> close() {
+    WidgetsBinding.instance?.removeObserver(this);
+    return super.close();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+
+    /// we need to track the case when the user went to app settings, changed permissions and came back
+    if (Platform.isAndroid){
+      if (state == AppLifecycleState.resumed && _prevState!=null && _prevState == AppLifecycleState.paused) {
+        _init();
+      }
+
+      _prevState = state;
+    }
+  }
+
   _init() async {
-    _prefs = await SharedPreferences.getInstance();
+
+    emit(state.copyWith(
+      micStatus: MyPermissionStatus.unknown,
+      camStatus: MyPermissionStatus.unknown,
+    ));
+
+    _prefs ??= await SharedPreferences.getInstance();
 
     await Future.delayed(const Duration(milliseconds: 400));
 
