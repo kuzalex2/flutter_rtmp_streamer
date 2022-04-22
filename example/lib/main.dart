@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_rtmp_streamer_example/screens/camera_screen.dart';
 import 'package:flutter_rtmp_streamer_example/screens/loader.dart';
 import 'package:flutter_rtmp_streamer_example/screens/permissions/permission_screen.dart';
 
@@ -71,15 +72,7 @@ class MainScreen extends StatelessWidget {
 
 
 
-class CameraScreen extends StatelessWidget {
-  const CameraScreen({Key? key}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Center(child: Text("Camera here", style: textTheme.bodyText1,),);
-  }
-}
 
 
 

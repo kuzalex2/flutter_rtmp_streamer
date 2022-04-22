@@ -1,24 +1,41 @@
 package com.example.flutter_rtmp_streamer
 
+import android.content.Context
 import androidx.annotation.NonNull
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import io.flutter.plugin.common.StandardMessageCodec
+import io.flutter.plugin.platform.PlatformView
+import io.flutter.plugin.platform.PlatformViewFactory
+
+
+internal class CameraViewFactory(private val messenger: BinaryMessenger): PlatformViewFactory(
+  StandardMessageCodec.INSTANCE)  {
+
+  override fun create(context: Context, id: Int, args: Any?): PlatformView {
+    val creationParams = args as Map<String?, Any?>?
+//    return CameraView(context, id, messenger, creationParams, this)
+    return CameraView(context, id, creationParams)
+  }
+}
 
 /** FlutterRtmpStreamerPlugin */
 class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
-  /// The MethodChannel that will the communication between Flutter and native Android
-  ///
-  /// This local reference serves to register the plugin with the Flutter Engine and unregister it
-  /// when the Flutter Engine is detached from the Activity
   private lateinit var channel : MethodChannel
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_rtmp_streamer")
     channel.setMethodCallHandler(this)
+
+    flutterPluginBinding
+      .platformViewRegistry
+      .registerViewFactory("flutter_rtmp_streamer_camera_view", CameraViewFactory(flutterPluginBinding.binaryMessenger))
+
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
