@@ -32,6 +32,8 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_rtmp_streamer")
     channel.setMethodCallHandler(this)
 
+    RtpService.init(flutterPluginBinding.applicationContext)
+
     flutterPluginBinding
       .platformViewRegistry
       .registerViewFactory("flutter_rtmp_streamer_camera_view", CameraViewFactory(flutterPluginBinding.binaryMessenger))
