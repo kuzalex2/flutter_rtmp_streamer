@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_rtmp_streamer/flutter_rtmp_streamer.dart';
+import 'package:flutter_rtmp_streamer_example/screens/loader.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({Key? key}) : super(key: key);
@@ -14,9 +15,22 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen> {
 
   String? _platformVersion;
+  FlutterRtmpStreamer? streamer1;
+  /// just for test 2 different controller instances
+  FlutterRtmpStreamer? streamer2;
 
   @override
   void initState() {
+
+
+    FlutterRtmpStreamer.init().then((value) {
+      streamer1 = value;
+    });
+
+    FlutterRtmpStreamer.init().then((value) {
+      streamer2 = value;
+    });
+
     FlutterRtmpStreamer.platformVersion.then((version)  {
       setState(() {
         _platformVersion = version;
@@ -43,7 +57,6 @@ class _CameraScreenState extends State<CameraScreen> {
           SizedBox(
             width: 100,
             height: 100,
-            // child: Container(color: Colors.red,),
 
             child: OrientationBuilder(
               builder: (context, orientation) {
@@ -59,6 +72,23 @@ class _CameraScreenState extends State<CameraScreen> {
               }
             ),
           ),
+
+          const SizedBox(height: 20,),
+
+          Row(children: [
+            const Spacer(),
+
+            LeftControlBox(streamer: streamer1),
+
+            const Spacer(),
+
+            RightControlBox(streamer: streamer2),
+
+
+            const Spacer(),
+
+          ],),
+
         ],
       ),
     );
@@ -72,6 +102,75 @@ class _CameraScreenState extends State<CameraScreen> {
     // );
   }
 }
+
+class LeftControlBox extends StatelessWidget {
+  const LeftControlBox({Key? key, required this.streamer}) : super(key: key);
+  final FlutterRtmpStreamer? streamer;
+
+  @override
+  Widget build(BuildContext context) {
+    if (streamer==null) {
+      return const Loader();
+    }
+
+    return StreamBuilder<StreamingState>(
+      stream: streamer!.stream,
+      builder: (context, snap) {
+        if (!snap.hasData){
+          return const Loader();
+        }
+
+        return Text("isAudioMuted = ${snap.data!.isAudioMuted}\n"
+            "isOnPreview = ${snap.data!.isOnPreview}\n"
+            "isRtmpConnected = ${snap.data!.isRtmpConnected}\n"
+            "isStreaming = ${snap.data!.isStreaming}\n"
+        );
+      }
+    );
+  }
+}
+
+class RightControlBox extends StatelessWidget {
+  const RightControlBox({Key? key, required this.streamer}) : super(key: key);
+  final FlutterRtmpStreamer? streamer;
+
+  @override
+  Widget build(BuildContext context) {
+    if (streamer==null) {
+      return const Loader();
+    }
+
+
+    return ElevatedButton(
+        onPressed: () {
+          try {
+            streamer!.state.isStreaming ?
+
+              streamer!.stopStream() :
+
+              streamer!.startStream(
+                  uri: "rtmp://flutter-webrtc.kuzalex.com/live",
+                  streamName: "one"
+              );
+          } catch (e) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('Error: $e'),
+            ));
+          }
+        },
+        child: StreamBuilder<Object>(
+          stream: streamer!.stream,
+          builder: (context, _) {
+            return Text(
+              streamer!.state.isStreaming ? "Stop streaming" : "Start streaming"
+            );
+          }
+        )
+    );
+
+  }
+}
+
 //
 // class CameraScreen extends StatelessWidget {
 //   const CameraScreen({Key? key}) : super(key: key);

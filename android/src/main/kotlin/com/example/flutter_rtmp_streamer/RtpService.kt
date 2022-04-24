@@ -1,18 +1,4 @@
-/*
- * Copyright (C) 2021 pedroSG94.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 
 package com.example.flutter_rtmp_streamer
 
@@ -27,6 +13,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import com.pedro.encoder.input.video.CameraHelper
 import com.pedro.rtplibrary.base.Camera2Base
 import com.pedro.rtplibrary.rtmp.RtmpCamera2
 import com.pedro.rtplibrary.rtsp.RtspCamera2
@@ -86,6 +73,8 @@ class RtpService : Service() {
     private var camera2Base: Camera2Base? = null
     private var openGlView: OpenGlView? = null
     private var contextApp: Context? = null
+    private var isRtmpConnected: Boolean = false
+    private var dartMessenger:DartMessenger? = null
 
     fun setView(openGlView: OpenGlView) {
       this.openGlView = openGlView
@@ -100,23 +89,65 @@ class RtpService : Service() {
 
     fun startPreview() {
       camera2Base?.startPreview()
+      sendCameraStatus()
+
     }
 
-    fun init(context: Context) {
+    fun init(context: Context, dartMessenger: DartMessenger) {
       contextApp = context
-      if (camera2Base == null) camera2Base = RtmpCamera2(context, true, connectCheckerRtp)
+      this.dartMessenger = dartMessenger
+      if (camera2Base == null) {
+        camera2Base = RtmpCamera2(context, true, connectCheckerRtp)
+        isRtmpConnected = false
+      }
     }
 
     fun stopStream() {
       if (camera2Base != null) {
         if (camera2Base!!.isStreaming) camera2Base!!.stopStream()
+        isRtmpConnected = false
+        sendCameraStatus()
       }
     }
 
     fun stopPreview() {
       if (camera2Base != null) {
         if (camera2Base!!.isOnPreview) camera2Base!!.stopPreview()
+        sendCameraStatus()
+
       }
+    }
+
+    ///
+    ///
+    ///
+
+    fun getStreamingState():MutableMap<String, String>
+    {
+      val reply: MutableMap<String, String> = HashMap()
+
+
+      reply["isStreaming"] = camera2Base!!.isStreaming.toString()
+      reply["isOnPreview"] = camera2Base!!.isOnPreview.toString()
+      reply["isAudioMuted"] = camera2Base!!.isAudioMuted.toString()
+      reply["isRtmpConnected"] = isRtmpConnected.toString()
+
+
+      return reply
+    }
+
+    fun sendCameraStatus() {
+      dartMessenger?.send(
+        "StreamingState",
+        getStreamingState()
+      )
+    }
+
+    fun sendError(error: String) {
+      dartMessenger?.send(
+        "StreamingError",
+        mapOf("description" to error)
+      )
     }
 
 
@@ -126,8 +157,10 @@ class RtpService : Service() {
       }
 
       override fun onConnectionSuccessRtp() {
+        isRtmpConnected = true
         showNotification("Stream started")
         Log.e(TAG, "RTP service destroy")
+        sendCameraStatus()
       }
 
       override fun onNewBitrateRtp(bitrate: Long) {
@@ -137,10 +170,15 @@ class RtpService : Service() {
       override fun onConnectionFailedRtp(reason: String) {
         showNotification("Stream connection failed")
         Log.e(TAG, "RTP service destroy")
+        sendCameraStatus()
+
       }
 
       override fun onDisconnectRtp() {
+        isRtmpConnected = false
         showNotification("Stream stopped")
+        sendCameraStatus()
+
       }
 
       override fun onAuthErrorRtp() {
@@ -195,5 +233,11 @@ class RtpService : Service() {
     } else {
       showNotification("You are already streaming :(")
     }
+    sendCameraStatus()
+
   }
+
+
+
+
 }

@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2022 kuzalex.
+ *
+ */
 package com.example.flutter_rtmp_streamer
 
 
