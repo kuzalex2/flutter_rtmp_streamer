@@ -140,18 +140,19 @@ class RightControlBox extends StatelessWidget {
       return const Loader();
     }
 
-
     return ElevatedButton(
         onPressed: () {
           try {
-            streamer!.state.isStreaming ?
 
-              streamer!.stopStream() :
-
+            if ( streamer!.state.isStreaming ) {
+              streamer!.stopStream();
+            } else {
               streamer!.startStream(
                   uri: "rtmp://flutter-webrtc.kuzalex.com/live",
                   streamName: "one"
               );
+            }
+
           } catch (e) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text('Error: $e'),

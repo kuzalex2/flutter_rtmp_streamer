@@ -73,11 +73,26 @@ class RtpService : Service() {
     Log.e(TAG, "RTP service started")
     endpoint = intent?.extras?.getString("endpoint")
     if (endpoint != null) {
-      prepareStreamRtp()
+      prepareStreamRtp(baseContext, endpoint!!)
       startStreamRtp(endpoint!!)
     }
     return START_STICKY
   }
+
+  override fun onDestroy() {
+    super.onDestroy()
+    Log.e(TAG, "RTP service destroy")
+    stopStream()
+  }
+
+
+
+
+
+
+
+
+
 
   companion object {
     private const val TAG = "RtpService"
@@ -107,6 +122,8 @@ class RtpService : Service() {
 
     }
 
+
+
     fun init(context: Context, dartMessenger: DartMessenger) {
       contextApp = context
       this.dartMessenger = dartMessenger
@@ -129,6 +146,44 @@ class RtpService : Service() {
         if (camera2Base!!.isOnPreview) camera2Base!!.stopPreview()
         sendCameraStatus()
 
+      }
+    }
+
+    private fun prepareStreamRtp(baseContext: Context, endpoint: String) {
+      stopStream()
+      stopPreview()
+      if (endpoint.startsWith("rtmp")) {
+        camera2Base = if (openGlView == null) {
+          RtmpCamera2(baseContext, true, connectCheckerRtp)
+        } else {
+          RtmpCamera2(openGlView, connectCheckerRtp)
+        }
+      } else {
+        camera2Base = if (openGlView == null) {
+          RtspCamera2(baseContext, true, connectCheckerRtp)
+        } else {
+          RtspCamera2(openGlView, connectCheckerRtp)
+        }
+      }
+    }
+
+    private fun startStreamRtp(endpoint: String) {
+      if (!camera2Base!!.isStreaming) {
+        if (camera2Base!!.prepareVideo() && camera2Base!!.prepareAudio()) {
+          camera2Base!!.startStream(endpoint)
+        }
+      } else {
+        showNotification("You are already streaming :(")
+      }
+      sendCameraStatus()
+
+    }
+
+
+    fun startInForeground(baseContext: Context, endpoint: String) {
+      if (!camera2Base!!.isStreaming) {
+        prepareStreamRtp(baseContext, endpoint)
+        startStreamRtp(endpoint)
       }
     }
 
@@ -207,48 +262,12 @@ class RtpService : Service() {
     private fun showNotification(text: String) {
       contextApp?.let {
         val notification = NotificationCompat.Builder(it, channelId)
-            .setSmallIcon(android.R.drawable.presence_video_online)
-            .setContentTitle("RTP Stream")
-            .setContentText(text).build()
+          .setSmallIcon(android.R.drawable.presence_video_online)
+          .setContentTitle("RTP Stream")
+          .setContentText(text).build()
         notificationManager?.notify(notifyId, notification)
       }
     }
-  }
-
-  override fun onDestroy() {
-    super.onDestroy()
-    Log.e(TAG, "RTP service destroy")
-    stopStream()
-  }
-
-  private fun prepareStreamRtp() {
-    stopStream()
-    stopPreview()
-    if (endpoint!!.startsWith("rtmp")) {
-      camera2Base = if (openGlView == null) {
-        RtmpCamera2(baseContext, true, connectCheckerRtp)
-      } else {
-        RtmpCamera2(openGlView, connectCheckerRtp)
-      }
-    } else {
-      camera2Base = if (openGlView == null) {
-        RtspCamera2(baseContext, true, connectCheckerRtp)
-      } else {
-        RtspCamera2(openGlView, connectCheckerRtp)
-      }
-    }
-  }
-
-  private fun startStreamRtp(endpoint: String) {
-    if (!camera2Base!!.isStreaming) {
-      if (camera2Base!!.prepareVideo() && camera2Base!!.prepareAudio()) {
-        camera2Base!!.startStream(endpoint)
-      }
-    } else {
-      showNotification("You are already streaming :(")
-    }
-    sendCameraStatus()
-
   }
 
 

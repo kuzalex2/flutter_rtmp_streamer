@@ -36,6 +36,8 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
   private lateinit var channel : MethodChannel
   private lateinit var applicationContext : Context
 
+  private var fgService: Boolean = false
+
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_rtmp_streamer")
     channel.setMethodCallHandler(this)
@@ -55,6 +57,8 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
+
+
 
     when (call.method) {
       /**
@@ -87,12 +91,17 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
           val streamName:String = call.argument("streamName")!!
           val endpoint = "$uri/$streamName"
 
+          if (fgService){
+            if (! isMyServiceRunning(RtpService::class.java)) {
 
-          if (! isMyServiceRunning(RtpService::class.java)) {
+              val intent = Intent(applicationContext, RtpService::class.java)
+              intent.putExtra("endpoint", endpoint)
+              applicationContext.startService(intent)
+            }
 
-            val intent = Intent(applicationContext, RtpService::class.java)
-            intent.putExtra("endpoint", endpoint)
-            applicationContext.startService(intent)
+          } else {
+            RtpService.startInForeground(applicationContext, endpoint)
+
           }
 
         } catch (e: Exception) {
@@ -111,9 +120,17 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
       "stopStream" -> {
         try {
 
-          if (isMyServiceRunning(RtpService::class.java)) {
-            applicationContext.stopService(Intent(applicationContext, RtpService::class.java))
+          if (fgService){
+
+            if (isMyServiceRunning(RtpService::class.java)) {
+              applicationContext.stopService(Intent(applicationContext, RtpService::class.java))
+            }
+
+          } else {
+            RtpService.stopStream();
           }
+
+
 
         } catch (e: Exception) {
           result.error("stopStream", e.toString(), null)
@@ -131,6 +148,11 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
     channel.setMethodCallHandler(null)
+
+    if (!fgService){
+
+      RtpService.stopStream();
+    }
   }
 
   @Suppress("DEPRECATION")
