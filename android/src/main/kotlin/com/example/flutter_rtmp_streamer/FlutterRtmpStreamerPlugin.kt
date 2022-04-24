@@ -124,21 +124,6 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
         return
       }
 
-
-
-      /// b_start_stop.setOnClickListener {
-      //      if (isMyServiceRunning(RtpService::class.java)) {
-      //        stopService(Intent(applicationContext, RtpService::class.java))
-      //        b_start_stop.setText(R.string.start_button)
-      //      } else {
-      //        val intent = Intent(applicationContext, RtpService::class.java)
-      //        intent.putExtra("endpoint", "rtmp://flutter-webrtc.kuzalex.com/live/one")
-      //        startService(intent)
-      //        b_start_stop.setText(R.string.stop_button)
-      //      }
-      //    }
-
-
       else -> result.notImplemented()
 
     }
