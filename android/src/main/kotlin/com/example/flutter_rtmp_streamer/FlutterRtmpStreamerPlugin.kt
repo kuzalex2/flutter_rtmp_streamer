@@ -7,7 +7,6 @@ package com.example.flutter_rtmp_streamer
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import androidx.annotation.NonNull
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -36,7 +35,8 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
   private lateinit var channel : MethodChannel
   private lateinit var applicationContext : Context
 
-  private var fgService: Boolean = false
+//  private var fgService: Boolean = false
+  private var fgService: Boolean = true
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_rtmp_streamer")
@@ -48,7 +48,7 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
       DartMessenger(flutterPluginBinding.binaryMessenger, "flutter_rtmp_streamer/events")
     )
 
-    RtpService.sendCameraStatus();
+    RtpService.sendCameraStatusToDart();
 
     flutterPluginBinding
       .platformViewRegistry
@@ -75,7 +75,7 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
        *
        */
       "getStreamerState" -> {
-        RtpService.sendCameraStatus()
+        RtpService.sendCameraStatusToDart()
         result.success( true )
         return
       }

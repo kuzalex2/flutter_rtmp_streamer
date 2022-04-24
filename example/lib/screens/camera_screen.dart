@@ -47,6 +47,23 @@ class _CameraScreenState extends State<CameraScreen> {
     return Center(
       child: Column(
         children: [
+
+          if (streamer1!=null)
+            StreamBuilder<StreamingNotification>(
+              stream: streamer1!.notificationStream,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+
+                  WidgetsBinding.instance?.addPostFrameCallback((_) =>
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(snapshot.data!.description),
+                    ))
+                  );
+                }
+                return const SizedBox();
+              }
+            ),
+
           const SizedBox(height: 100,),
           Text(
             "Camera here. \nPlugin version=$_platformVersion",
@@ -114,7 +131,7 @@ class LeftControlBox extends StatelessWidget {
     }
 
     return StreamBuilder<StreamingState>(
-      stream: streamer!.stream,
+      stream: streamer!.stateStream,
       builder: (context, snap) {
         if (!snap.hasData){
           return const Loader();
@@ -160,7 +177,7 @@ class RightControlBox extends StatelessWidget {
           }
         },
         child: StreamBuilder<Object>(
-          stream: streamer!.stream,
+          stream: streamer!.stateStream,
           builder: (context, _) {
             return Text(
               streamer!.state.isStreaming ? "Stop streaming" : "Start streaming"

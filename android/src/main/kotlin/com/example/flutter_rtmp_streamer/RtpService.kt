@@ -27,7 +27,6 @@ import android.os.IBinder
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import com.pedro.encoder.input.video.CameraHelper
 import com.pedro.rtplibrary.base.Camera2Base
 import com.pedro.rtplibrary.rtmp.RtmpCamera2
 import com.pedro.rtplibrary.rtsp.RtspCamera2
@@ -118,7 +117,7 @@ class RtpService : Service() {
 
     fun startPreview() {
       camera2Base?.startPreview()
-      sendCameraStatus()
+      sendCameraStatusToDart()
 
     }
 
@@ -137,14 +136,14 @@ class RtpService : Service() {
       if (camera2Base != null) {
         if (camera2Base!!.isStreaming) camera2Base!!.stopStream()
         isRtmpConnected = false
-        sendCameraStatus()
+        sendCameraStatusToDart()
       }
     }
 
     fun stopPreview() {
       if (camera2Base != null) {
         if (camera2Base!!.isOnPreview) camera2Base!!.stopPreview()
-        sendCameraStatus()
+        sendCameraStatusToDart()
 
       }
     }
@@ -175,7 +174,7 @@ class RtpService : Service() {
       } else {
         showNotification("You are already streaming :(")
       }
-      sendCameraStatus()
+      sendCameraStatusToDart()
 
     }
 
@@ -205,17 +204,17 @@ class RtpService : Service() {
       return reply
     }
 
-    fun sendCameraStatus() {
+    fun sendCameraStatusToDart() {
       dartMessenger?.send(
         "StreamingState",
         getStreamingState()
       )
     }
 
-    fun sendError(error: String) {
+    private fun sendNotificationToDart(description: String) {
       dartMessenger?.send(
-        "StreamingError",
-        mapOf("description" to error)
+        "Notification",
+        mapOf("description" to description)
       )
     }
 
@@ -229,7 +228,7 @@ class RtpService : Service() {
         isRtmpConnected = true
         showNotification("Stream started")
         Log.e(TAG, "RTP service destroy")
-        sendCameraStatus()
+        sendCameraStatusToDart()
       }
 
       override fun onNewBitrateRtp(bitrate: Long) {
@@ -237,16 +236,17 @@ class RtpService : Service() {
       }
 
       override fun onConnectionFailedRtp(reason: String) {
+        isRtmpConnected = false
         showNotification("Stream connection failed")
         Log.e(TAG, "RTP service destroy")
-        sendCameraStatus()
+        sendCameraStatusToDart()
 
       }
 
       override fun onDisconnectRtp() {
         isRtmpConnected = false
         showNotification("Stream stopped")
-        sendCameraStatus()
+        sendCameraStatusToDart()
 
       }
 
@@ -267,6 +267,7 @@ class RtpService : Service() {
           .setContentText(text).build()
         notificationManager?.notify(notifyId, notification)
       }
+      this.sendNotificationToDart(text);
     }
   }
 

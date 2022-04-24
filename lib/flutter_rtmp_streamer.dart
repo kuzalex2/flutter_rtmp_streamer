@@ -50,6 +50,30 @@ class StreamingState extends Equatable {
 }
 
 
+class StreamingNotification extends Equatable {
+
+  final String description;
+
+
+  const StreamingNotification( {
+    required this.description,
+  });
+
+
+  StreamingNotification copyWith({
+    String? description,
+  }) {
+    return StreamingNotification(
+      description: description ?? this.description,
+    );
+  }
+
+  @override
+  List<Object> get props => [
+    description,
+  ];
+}
+
 class FlutterRtmpStreamer {
   static const MethodChannel _channel = MethodChannel('flutter_rtmp_streamer');
 
@@ -68,25 +92,61 @@ class FlutterRtmpStreamer {
     return __stateController ??= StreamController<StreamingState>.broadcast();
   }
 
+  StreamController<StreamingNotification>? __nofiticationController;
+  StreamController<StreamingNotification> get _nofiticationController {
+    return __nofiticationController ??= StreamController<StreamingNotification>.broadcast();
+  }
+
 
   /// The current state stream.
-  Stream<StreamingState> get stream => _stateController.stream;
+  Stream<StreamingState> get stateStream => _stateController.stream;
+  /// Notifications from streaming module
+  Stream<StreamingNotification> get notificationStream => _nofiticationController.stream;
 
 
   FlutterRtmpStreamer._()
   {
     _events.listen((event) {
       debugPrint('$event');
-      _state = StreamingState(
-          isStreaming: event['isStreaming'].toLowerCase() == 'true',
-          isOnPreview: event['isOnPreview'].toLowerCase() == 'true',
-          isAudioMuted: event['isAudioMuted'].toLowerCase() == 'true',
-          isRtmpConnected: event['isRtmpConnected'].toLowerCase() == 'true'
-      );
 
-      if (!_stateController.isClosed) {
-        _stateController.add(_state);
+      switch (event['eventType']){
+
+        ///
+        ///
+        ///
+        case "StreamingState": {
+
+          _state = StreamingState(
+              isStreaming: event['isStreaming'].toLowerCase() == 'true',
+              isOnPreview: event['isOnPreview'].toLowerCase() == 'true',
+              isAudioMuted: event['isAudioMuted'].toLowerCase() == 'true',
+              isRtmpConnected: event['isRtmpConnected'].toLowerCase() == 'true'
+          );
+          if (!_stateController.isClosed) {
+            _stateController.add(_state);
+          }
+        }
+        break;
+
+        ///
+        ///
+        ///
+        case "Notification": {
+          final notification = StreamingNotification(description: event['description']);
+          if (!_nofiticationController.isClosed) {
+            _nofiticationController.add(notification);
+          }
+
+        }
+        break;
+
+        default:
+          debugPrint("Unknown event");
       }
+
+
+
+
 
 
     });
@@ -121,7 +181,7 @@ class FlutterRtmpStreamer {
   static Future<FlutterRtmpStreamer> init() async {
     final instance = FlutterRtmpStreamer._();
     _channel.invokeMethod('getStreamerState');
-    await instance.stream.first;
+    await instance.stateStream.first;
 
 
     return instance;
