@@ -41,13 +41,143 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: streamer.cameraPreview(),
+    return Scaffold(
+      appBar: AppBar(
+          leading: const Icon(
+            Icons.menu,
+          ),
+          title:const Text("FlutterRtmpStreamer")
+      ),
+      body: Stack(
+        children: [
+
+          streamer.cameraPreview(),
+
+          NotificationListener(streamer: streamer),
+
+          Positioned(
+            bottom: 50,
+
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white30,
+                borderRadius: BorderRadius.all(Radius.circular(20))
+              ),
+              width: MediaQuery.of(context).size.width,
+              child: Row(children: [
+                  const Spacer(),
+                  LeftControlBox(streamer: streamer),
+                  const Spacer(),
+                  RightControlBox(streamer: streamer),
+                  const Spacer(),
+              ]),
+            ),
+
+          ),
+
+        ],
+      ),
     );
   }
 }
 
 
+class LeftControlBox extends StatelessWidget {
+  const LeftControlBox({Key? key, required this.streamer}) : super(key: key);
+  final FlutterRtmpStreamer? streamer;
+
+  @override
+  Widget build(BuildContext context) {
+    if (streamer==null) {
+      return const Loader();
+    }
+
+    return StreamBuilder<StreamingState>(
+        stream: streamer!.stateStream,
+        builder: (context, snap) {
+          if (!snap.hasData){
+            return const Loader();
+          }
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Text("isAudioMuted = ${snap.data!.isAudioMuted}\n"
+                "isOnPreview = ${snap.data!.isOnPreview}\n"
+                "isRtmpConnected = ${snap.data!.isRtmpConnected}\n"
+                "isStreaming = ${snap.data!.isStreaming}"
+            ),
+          );
+        }
+    );
+  }
+}
+
+class RightControlBox extends StatelessWidget {
+  const RightControlBox({Key? key, required this.streamer}) : super(key: key);
+  final FlutterRtmpStreamer? streamer;
+
+  @override
+  Widget build(BuildContext context) {
+    if (streamer==null) {
+      return const Loader();
+    }
+
+    return ElevatedButton(
+        onPressed: () {
+          try {
+
+            if ( streamer!.state.isStreaming ) {
+              streamer!.stopStream();
+            } else {
+              streamer!.startStream(
+                  uri: "rtmp://flutter-webrtc.kuzalex.com/live",
+                  streamName: "one"
+              );
+            }
+
+          } catch (e) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('Error: $e'),
+            ));
+          }
+        },
+        child: StreamBuilder<Object>(
+            stream: streamer!.stateStream,
+            builder: (context, _) {
+              return Text(
+                  streamer!.state.isStreaming ? "Stop streaming" : "Start streaming"
+              );
+            }
+        )
+    );
+
+  }
+}
+
+
+class NotificationListener extends StatelessWidget {
+  const NotificationListener ({Key? key, required this.streamer}) : super(key: key);
+  final FlutterRtmpStreamer streamer;
+
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<StreamingNotification>(
+        stream: streamer.notificationStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+
+            WidgetsBinding.instance?.addPostFrameCallback((_) =>
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(snapshot.data!.description),
+                ))
+            );
+          }
+          return const SizedBox();
+        }
+    );
+  }
+}
 
 
 
