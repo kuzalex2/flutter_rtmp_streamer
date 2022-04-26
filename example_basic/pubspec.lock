@@ -43,8 +43,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.15.0"
-  equatable:
+  cupertino_icons:
     dependency: "direct main"
+    description:
+      name: cupertino_icons
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.4"
+  equatable:
+    dependency: transitive
     description:
       name: equatable
       url: "https://pub.dartlang.org"
@@ -69,6 +76,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.4"
+  flutter_rtmp_streamer:
+    dependency: "direct main"
+    description:
+      path: ".."
+      relative: true
+    source: path
+    version: "0.0.1"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -110,7 +124,7 @@ packages:
     source: hosted
     version: "1.8.0"
   permission_handler:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: permission_handler
       url: "https://pub.dartlang.org"

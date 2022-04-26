@@ -4,6 +4,8 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:equatable/equatable.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'dart:io' show Platform;
 
 
 class StreamingState extends Equatable {
@@ -73,6 +75,33 @@ class StreamingNotification extends Equatable {
     description,
   ];
 }
+
+class _FlutterRtmpCameraPreview extends StatelessWidget {
+  const _FlutterRtmpCameraPreview({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+
+    if (Platform.isAndroid) {
+      return AndroidView(
+        key: key,
+
+        viewType: 'flutter_rtmp_streamer_camera_view',
+        onPlatformViewCreated: (id) {
+          debugPrint("_onPlatformViewCreated $id");
+        },
+        creationParamsCodec: const StandardMessageCodec(),
+      );
+    }
+
+    // if (Platform.isIOS) {
+    //
+    // }
+
+    return Center(child: Text("FlutterRtmpCamera doesn't support ${Platform.operatingSystem} yet."),);
+  }
+}
+
 
 class FlutterRtmpStreamer {
   static const MethodChannel _channel = MethodChannel('flutter_rtmp_streamer');
@@ -184,8 +213,19 @@ class FlutterRtmpStreamer {
     await instance.stateStream.first;
 
 
+    if (!(await Permission.microphone.request().isGranted)) {
+      throw 'We need microphone permission to stream';
+    }
+
+    if (!(await Permission.camera.request().isGranted)) {
+      throw 'We need camera permission to stream';
+    }
+
     return instance;
   }
+
+
+  _FlutterRtmpCameraPreview cameraPreview({Key? key}) => _FlutterRtmpCameraPreview(key: key,);
 
 
   static Future<String?> get platformVersion async {
