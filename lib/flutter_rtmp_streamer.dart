@@ -29,6 +29,11 @@ class StreamingState extends Equatable {
     required this.cameraOrientation,
   });
 
+  static const empty = StreamingState._(isStreaming:false,isOnPreview: false,isAudioMuted: false,isRtmpConnected: false, streamResolution: Size(0,0), cameraOrientation: 0);
+
+  bool get isEmpty => this == empty;
+  bool get isNotEmpty => !isEmpty;
+
   factory StreamingState.fromJson(Map<String, dynamic> json) =>
       StreamingState._(
         isStreaming: json['isStreaming'] as bool,
@@ -94,15 +99,39 @@ class StreamingNotification extends Equatable {
   ];
 }
 
-class _FlutterRtmpCameraPreview extends StatelessWidget {
-  const _FlutterRtmpCameraPreview({Key? key}) : super(key: key);
+class FlutterRtmpCameraPreview extends StatelessWidget {
+  const FlutterRtmpCameraPreview({Key? key, required this.controller}) : super(key: key);
+  final FlutterRtmpStreamer controller;
 
   @override
   Widget build(BuildContext context) {
 
+    return StreamBuilder<StreamingState>(
+      stream: controller.stateStream,
+      initialData: controller.state,
+      builder: (context, snapshot) {
+        if (snapshot.hasError){
+          return Text(snapshot.error.toString());
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const CupertinoActivityIndicator();
+        }
+
+        return _FlutterRtmpCameraPreview(key: key, state: snapshot.data!);
+      }
+    );
+  }
+}
+
+class _FlutterRtmpCameraPreview extends StatelessWidget {
+  const _FlutterRtmpCameraPreview({Key? key, required this.state}) : super(key: key);
+  final StreamingState state;
+
+  @override
+  Widget build(BuildContext context) {
     if (Platform.isAndroid) {
       return AspectRatio(
-        aspectRatio: 480.0/640.0,
+        aspectRatio: state.streamResolution.width == 0 ? 1.0 : state.streamResolution.height / state.streamResolution.width,
         child: AndroidView(
           key: key,
 
@@ -124,6 +153,7 @@ class _FlutterRtmpCameraPreview extends StatelessWidget {
 }
 
 
+
 class FlutterRtmpStreamer {
   static const MethodChannel _channel = MethodChannel('flutter_rtmp_streamer');
 
@@ -132,7 +162,7 @@ class FlutterRtmpStreamer {
   static const EventChannel _inputChannel =  EventChannel('flutter_rtmp_streamer/events');
   static final Stream _events = _inputChannel.receiveBroadcastStream();
 
-  late StreamingState _state;
+  StreamingState _state;
 
   /// The current [state].
   StreamingState get state => _state;
@@ -154,7 +184,7 @@ class FlutterRtmpStreamer {
   Stream<StreamingNotification> get notificationStream => _nofiticationController.stream;
 
 
-  FlutterRtmpStreamer._()
+  FlutterRtmpStreamer._(): _state = StreamingState.empty
   {
     _events.listen((event) {
       debugPrint('$event');
@@ -242,7 +272,7 @@ class FlutterRtmpStreamer {
   }
 
 
-  _FlutterRtmpCameraPreview cameraPreview({Key? key}) => _FlutterRtmpCameraPreview(key: key,);
+  // _FlutterRtmpCameraPreview cameraPreview({Key? key}) => _FlutterRtmpCameraPreview(key: key,);
 
 
   static Future<String?> get platformVersion async {
