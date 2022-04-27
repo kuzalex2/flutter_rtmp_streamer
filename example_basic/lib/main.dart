@@ -109,7 +109,7 @@ class LeftControlBox extends StatelessWidget {
                 "isOnPreview = ${streamingState.isOnPreview}\n"
                 "isRtmpConnected = ${streamingState.isRtmpConnected}\n"
                 "isStreaming = ${streamingState.isStreaming}\n"
-                "resolution=${streamingState.streamWidth}x${streamingState.streamHeight}\n"
+                "resolution=${streamingState.streamResolution}\n"
                 "cameraOrientation = ${streamingState.cameraOrientation}"
             ),
           );

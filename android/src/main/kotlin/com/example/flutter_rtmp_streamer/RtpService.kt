@@ -32,6 +32,7 @@ import com.pedro.rtplibrary.base.Camera2Base
 import com.pedro.rtplibrary.rtmp.RtmpCamera2
 import com.pedro.rtplibrary.rtsp.RtspCamera2
 import com.pedro.rtplibrary.view.OpenGlView
+import kotlinx.serialization.json.Json
 
 
 /**
@@ -191,20 +192,18 @@ class RtpService : Service() {
     ///
     ///
 
-    fun getStreamingState():MutableMap<String, String>
+    private fun getStreamingState():MutableMap<String, String>
     {
       val reply: MutableMap<String, String> = HashMap()
 
-
-      reply["isStreaming"] = camera2Base!!.isStreaming.toString()
-      reply["isOnPreview"] = camera2Base!!.isOnPreview.toString()
-      reply["isAudioMuted"] = camera2Base!!.isAudioMuted.toString()
-      reply["isRtmpConnected"] = isRtmpConnected.toString()
-
-      reply["streamWidth"] = camera2Base!!.streamWidth.toString()
-      reply["streamHeight"] = camera2Base!!.streamHeight.toString()
-
-      reply["cameraOrientation"] = CameraHelper.getCameraOrientation(contextApp).toString()
+      reply["streamState"] = Json.encodeToString(StreamState.serializer(), StreamState(
+        isStreaming = camera2Base!!.isStreaming,
+        isOnPreview = camera2Base!!.isOnPreview,
+        isAudioMuted = camera2Base!!.isAudioMuted,
+        isRtmpConnected = isRtmpConnected,
+        streamResolution = Resolution(width = camera2Base!!.streamWidth, height = camera2Base!!.streamHeight),
+        cameraOrientation = CameraHelper.getCameraOrientation(contextApp)
+      ));
 
       return reply
     }

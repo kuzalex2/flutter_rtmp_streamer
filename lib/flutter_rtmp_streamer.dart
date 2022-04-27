@@ -1,5 +1,6 @@
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -15,20 +16,32 @@ class StreamingState extends Equatable {
   final bool isAudioMuted;
   final bool isRtmpConnected;
 
-  final int streamWidth;
-  final int streamHeight;
+  final Size streamResolution;
   final int cameraOrientation;
 
 
-  const StreamingState( {
+  const StreamingState._( {
     required this.isStreaming,
     required this.isOnPreview,
     required this.isAudioMuted,
     required this.isRtmpConnected,
-    required this.streamWidth,
-    required this.streamHeight,
+    required this.streamResolution,
     required this.cameraOrientation,
   });
+
+  factory StreamingState.fromJson(Map<String, dynamic> json) =>
+      StreamingState._(
+        isStreaming: json['isStreaming'] as bool,
+        isOnPreview: json['isOnPreview'] as bool,
+        isAudioMuted: json['isAudioMuted'] as bool,
+        isRtmpConnected: json['isRtmpConnected'] as bool,
+        cameraOrientation: json['cameraOrientation'] as int,
+        streamResolution: Size(
+            (json['streamResolution']['width'] as int).toDouble(),
+            (json['streamResolution']['height'] as int).toDouble(),
+        )
+      );
+
 
   // StreamingState copyWith({
   //   bool? isStreaming,
@@ -51,8 +64,7 @@ class StreamingState extends Equatable {
     isAudioMuted,
     isRtmpConnected,
 
-    streamWidth,
-    streamHeight,
+    streamResolution,
     cameraOrientation,
   ];
 }
@@ -154,15 +166,8 @@ class FlutterRtmpStreamer {
         ///
         case "StreamingState": {
 
-          _state = StreamingState(
-            isStreaming: event['isStreaming'].toLowerCase() == 'true',
-            isOnPreview: event['isOnPreview'].toLowerCase() == 'true',
-            isAudioMuted: event['isAudioMuted'].toLowerCase() == 'true',
-            isRtmpConnected: event['isRtmpConnected'].toLowerCase() == 'true',
-            streamWidth: int.parse(event['streamWidth']),
-            streamHeight: int.parse(event['streamHeight']),
-            cameraOrientation: int.parse(event['cameraOrientation']),
-          );
+
+          _state = StreamingState.fromJson( jsonDecode(event['streamState']) );
           if (!_stateController.isClosed) {
             _stateController.add(_state);
           }
