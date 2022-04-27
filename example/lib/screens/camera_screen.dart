@@ -205,3 +205,45 @@ class RightControlBox extends StatelessWidget {
 //     );
 //   }
 // }
+
+
+/// Container(
+//         color: Colors.black,
+//         child: Center(
+//           child: Stack(
+//             children: [
+//
+//               streamer.cameraPreview(),
+//
+//               NotificationListener(streamer: streamer),
+//
+//               Positioned(
+//                 bottom: 20,
+//
+//
+//                 child: SizedBox(
+//                   width: MediaQuery.of(context).size.width,
+//                   child: Container(
+//                     padding: const EdgeInsets.symmetric(horizontal: 20),
+//                     child: Container(
+//                       decoration: const BoxDecoration(
+//                         color: Colors.white30,
+//                         borderRadius: BorderRadius.all(Radius.circular(20))
+//                       ),
+//                       child: Row(children: [
+//                           const Spacer(),
+//                           LeftControlBox(streamer: streamer),
+//                           const Spacer(),
+//                           RightControlBox(streamer: streamer),
+//                           const Spacer(),
+//                       ]),
+//                     ),
+//                   ),
+//                 ),
+//
+//               ),
+//
+//             ],
+//           ),
+//         ),
+//       ),

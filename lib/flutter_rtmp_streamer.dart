@@ -15,32 +15,34 @@ class StreamingState extends Equatable {
   final bool isAudioMuted;
   final bool isRtmpConnected;
 
+  final int streamWidth;
+  final int streamHeight;
+  final int cameraOrientation;
+
 
   const StreamingState( {
     required this.isStreaming,
     required this.isOnPreview,
     required this.isAudioMuted,
     required this.isRtmpConnected,
+    required this.streamWidth,
+    required this.streamHeight,
+    required this.cameraOrientation,
   });
 
-  // static const  = PermissionState(
-  //   micStatus: MyPermissionStatus.unknown,
-  //   camStatus:  MyPermissionStatus.unknown,
-  // );
-
-  StreamingState copyWith({
-    bool? isStreaming,
-    bool? isOnPreview,
-    bool? isAudioMuted,
-    bool? isRtmpConnected,
-  }) {
-    return StreamingState(
-      isStreaming: isStreaming ?? this.isStreaming,
-      isOnPreview: isOnPreview ?? this.isOnPreview,
-      isAudioMuted: isAudioMuted ?? this.isAudioMuted,
-      isRtmpConnected: isRtmpConnected ?? this.isRtmpConnected,
-    );
-  }
+  // StreamingState copyWith({
+  //   bool? isStreaming,
+  //   bool? isOnPreview,
+  //   bool? isAudioMuted,
+  //   bool? isRtmpConnected,
+  // }) {
+  //   return StreamingState(
+  //     isStreaming: isStreaming ?? this.isStreaming,
+  //     isOnPreview: isOnPreview ?? this.isOnPreview,
+  //     isAudioMuted: isAudioMuted ?? this.isAudioMuted,
+  //     isRtmpConnected: isRtmpConnected ?? this.isRtmpConnected,
+  //   );
+  // }
 
   @override
   List<Object> get props => [
@@ -48,6 +50,10 @@ class StreamingState extends Equatable {
     isOnPreview,
     isAudioMuted,
     isRtmpConnected,
+
+    streamWidth,
+    streamHeight,
+    cameraOrientation,
   ];
 }
 
@@ -83,14 +89,17 @@ class _FlutterRtmpCameraPreview extends StatelessWidget {
   Widget build(BuildContext context) {
 
     if (Platform.isAndroid) {
-      return AndroidView(
-        key: key,
+      return AspectRatio(
+        aspectRatio: 480.0/640.0,
+        child: AndroidView(
+          key: key,
 
-        viewType: 'flutter_rtmp_streamer_camera_view',
-        onPlatformViewCreated: (id) {
-          debugPrint("_onPlatformViewCreated $id");
-        },
-        creationParamsCodec: const StandardMessageCodec(),
+          viewType: 'flutter_rtmp_streamer_camera_view',
+          onPlatformViewCreated: (id) {
+            debugPrint("_onPlatformViewCreated $id");
+          },
+          creationParamsCodec: const StandardMessageCodec(),
+        ),
       );
     }
 
@@ -146,10 +155,13 @@ class FlutterRtmpStreamer {
         case "StreamingState": {
 
           _state = StreamingState(
-              isStreaming: event['isStreaming'].toLowerCase() == 'true',
-              isOnPreview: event['isOnPreview'].toLowerCase() == 'true',
-              isAudioMuted: event['isAudioMuted'].toLowerCase() == 'true',
-              isRtmpConnected: event['isRtmpConnected'].toLowerCase() == 'true'
+            isStreaming: event['isStreaming'].toLowerCase() == 'true',
+            isOnPreview: event['isOnPreview'].toLowerCase() == 'true',
+            isAudioMuted: event['isAudioMuted'].toLowerCase() == 'true',
+            isRtmpConnected: event['isRtmpConnected'].toLowerCase() == 'true',
+            streamWidth: int.parse(event['streamWidth']),
+            streamHeight: int.parse(event['streamHeight']),
+            cameraOrientation: int.parse(event['cameraOrientation']),
           );
           if (!_stateController.isClosed) {
             _stateController.add(_state);

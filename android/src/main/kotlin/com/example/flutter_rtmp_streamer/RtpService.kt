@@ -27,6 +27,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import com.pedro.encoder.input.video.CameraHelper
 import com.pedro.rtplibrary.base.Camera2Base
 import com.pedro.rtplibrary.rtmp.RtmpCamera2
 import com.pedro.rtplibrary.rtsp.RtspCamera2
@@ -200,6 +201,10 @@ class RtpService : Service() {
       reply["isAudioMuted"] = camera2Base!!.isAudioMuted.toString()
       reply["isRtmpConnected"] = isRtmpConnected.toString()
 
+      reply["streamWidth"] = camera2Base!!.streamWidth.toString()
+      reply["streamHeight"] = camera2Base!!.streamHeight.toString()
+
+      reply["cameraOrientation"] = CameraHelper.getCameraOrientation(contextApp).toString()
 
       return reply
     }

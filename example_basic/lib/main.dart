@@ -51,29 +51,31 @@ class MainScreen extends StatelessWidget {
       body: Stack(
         children: [
 
-          streamer.cameraPreview(),
+          Container(color: Colors.black,),
+
+          Center(
+              child: streamer.cameraPreview()
+          ),
 
           NotificationListener(streamer: streamer),
 
-          Positioned(
-            bottom: 50,
-
+          Center(
             child: Container(
               decoration: const BoxDecoration(
-                color: Colors.white30,
-                borderRadius: BorderRadius.all(Radius.circular(20))
+                  color: Colors.white30,
+                  borderRadius: BorderRadius.all(Radius.circular(20))
               ),
               width: MediaQuery.of(context).size.width,
               child: Row(children: [
-                  const Spacer(),
-                  LeftControlBox(streamer: streamer),
-                  const Spacer(),
-                  RightControlBox(streamer: streamer),
-                  const Spacer(),
+                const Spacer(),
+                LeftControlBox(streamer: streamer),
+                const Spacer(),
+                RightControlBox(streamer: streamer),
+                const Spacer(),
               ]),
             ),
-
           ),
+
 
         ],
       ),
@@ -99,12 +101,16 @@ class LeftControlBox extends StatelessWidget {
             return const Loader();
           }
 
+          final streamingState= snap.data!;
+
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Text("isAudioMuted = ${snap.data!.isAudioMuted}\n"
-                "isOnPreview = ${snap.data!.isOnPreview}\n"
-                "isRtmpConnected = ${snap.data!.isRtmpConnected}\n"
-                "isStreaming = ${snap.data!.isStreaming}"
+            child: Text("isAudioMuted = ${streamingState.isAudioMuted}\n"
+                "isOnPreview = ${streamingState.isOnPreview}\n"
+                "isRtmpConnected = ${streamingState.isRtmpConnected}\n"
+                "isStreaming = ${streamingState.isStreaming}\n"
+                "resolution=${streamingState.streamWidth}x${streamingState.streamHeight}\n"
+                "cameraOrientation = ${streamingState.cameraOrientation}"
             ),
           );
         }
