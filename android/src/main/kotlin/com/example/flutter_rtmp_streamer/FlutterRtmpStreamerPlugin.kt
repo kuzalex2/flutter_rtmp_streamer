@@ -18,6 +18,7 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.StandardMessageCodec
 import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.platform.PlatformViewFactory
+import kotlinx.serialization.json.Json
 
 
 internal class CameraViewFactory(private val messenger: BinaryMessenger): PlatformViewFactory(
@@ -74,7 +75,7 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
        *
        *
        */
-      "getStreamerState" -> {
+      "sendStreamerState" -> {
         RtpService.sendCameraStatusToDart()
         result.success( true )
         return
@@ -138,6 +139,26 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
         }
 
         result.success( true )
+        return
+      }
+
+      /**
+       *
+       *
+       */
+      "getResolutions" -> {
+        try {
+
+          result.success( Json.encodeToString(
+            BackAndFrontResolutions.serializer(),
+            BackAndFrontResolutions(back = RtpService.resolutionsBack(), front = RtpService.resolutionsFront())
+          ))
+
+        } catch (e: Exception) {
+          result.error("getResolutionsBack", e.toString(), null)
+          return;
+        }
+
         return
       }
 

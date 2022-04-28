@@ -188,6 +188,24 @@ class RtpService : Service() {
       }
     }
 
+    fun resolutionsBack():List<Resolution> {
+
+      return if (camera2Base!=null) {
+        camera2Base!!.resolutionsBack.filter { it.width >= it.height }.map { Resolution(it.width, it.height) }
+      } else {
+        ArrayList(0)
+      }
+    }
+
+    fun resolutionsFront():List<Resolution> {
+
+      return if (camera2Base!=null) {
+        camera2Base!!.resolutionsFront.filter { it.width >= it.height }.map { Resolution(it.width, it.height) }
+      } else {
+        ArrayList(0)
+      }
+    }
+
     ///
     ///
     ///

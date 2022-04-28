@@ -7,7 +7,25 @@ import 'package:flutter/services.dart';
 import 'package:equatable/equatable.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io' show Platform;
+import 'dart:collection';
 
+class Resolution extends Equatable {
+  final int width;
+  final int height;
+
+
+  // const Resolution.from({required this.width, required  this.height});
+  const Resolution(this.width, this.height);
+
+  @override
+  List<Object> get props => [
+    width,
+    height,
+  ];
+
+  @override
+  String toString() => "$width × $height";
+}
 
 class StreamingState extends Equatable {
 
@@ -16,7 +34,7 @@ class StreamingState extends Equatable {
   final bool isAudioMuted;
   final bool isRtmpConnected;
 
-  final Size streamResolution;
+  final Resolution streamResolution;
   final int cameraOrientation;
 
 
@@ -29,7 +47,7 @@ class StreamingState extends Equatable {
     required this.cameraOrientation,
   });
 
-  static const empty = StreamingState._(isStreaming:false,isOnPreview: false,isAudioMuted: false,isRtmpConnected: false, streamResolution: Size(0,0), cameraOrientation: 0);
+  static const empty = StreamingState._(isStreaming:false,isOnPreview: false,isAudioMuted: false,isRtmpConnected: false, streamResolution: Resolution(0,0), cameraOrientation: 0);
 
   bool get isEmpty => this == empty;
   bool get isNotEmpty => !isEmpty;
@@ -41,9 +59,9 @@ class StreamingState extends Equatable {
         isAudioMuted: json['isAudioMuted'] as bool,
         isRtmpConnected: json['isRtmpConnected'] as bool,
         cameraOrientation: json['cameraOrientation'] as int,
-        streamResolution: Size(
-            (json['streamResolution']['width'] as int).toDouble(),
-            (json['streamResolution']['height'] as int).toDouble(),
+        streamResolution: Resolution(
+            json['streamResolution']['width'] as int,
+            json['streamResolution']['height'] as int,
         )
       );
 
@@ -71,6 +89,51 @@ class StreamingState extends Equatable {
 
     streamResolution,
     cameraOrientation,
+  ];
+}
+
+
+class BackAndFrontResolutions extends Equatable {
+
+  final List<Resolution> _back;
+  final List<Resolution> _front;
+
+  UnmodifiableListView<Resolution> get back =>
+      UnmodifiableListView<Resolution>(_back);
+
+  UnmodifiableListView<Resolution> get front =>
+      UnmodifiableListView<Resolution>(_front);
+
+  const BackAndFrontResolutions._({required List<Resolution> back, required List<Resolution> front}):
+    _back = back,
+    _front = front
+  ;
+
+  static const empty = BackAndFrontResolutions._(back:[], front: [],);
+  bool get isEmpty => this == empty;
+  bool get isNotEmpty => !isEmpty;
+
+  factory BackAndFrontResolutions.fromJson(Map<String, dynamic> json) =>
+      BackAndFrontResolutions._(
+        back: (json['back'] as List<dynamic>).map((e) =>
+            Resolution(
+              ((e as Map<String, dynamic>)["width"]) as int,
+              ((e)["height"]) as int,
+            )
+          ).toList(),
+
+          front: (json['front'] as List<dynamic>).map((e) =>
+              Resolution(
+                ((e as Map<String, dynamic>)["width"]) as int,
+                ((e)["height"]) as int,
+              )
+          ).toList(),
+      );
+
+  @override
+  List<Object> get props => [
+    _back,
+    _front,
   ];
 }
 
@@ -183,6 +246,8 @@ class FlutterRtmpStreamer {
   /// Notifications from streaming module
   Stream<StreamingNotification> get notificationStream => _nofiticationController.stream;
 
+  bool _initialized = false;
+
 
   FlutterRtmpStreamer._(): _state = StreamingState.empty
   {
@@ -229,6 +294,10 @@ class FlutterRtmpStreamer {
   }
 
   startStream({required String uri, required String streamName}) async {
+    if (!_initialized) {
+      throw 'FlutterRtmpStreamer not initialized!';
+    }
+
     try {
       await _channel.invokeMethod(
           'startStream',
@@ -246,6 +315,11 @@ class FlutterRtmpStreamer {
   }
 
   stopStream() async {
+
+    if (!_initialized) {
+      throw 'FlutterRtmpStreamer not initialized!';
+    }
+
     try {
       await _channel.invokeMethod('stopStream');
     } catch (e) {
@@ -254,11 +328,23 @@ class FlutterRtmpStreamer {
     }
   }
 
-  static Future<FlutterRtmpStreamer> init() async {
-    final instance = FlutterRtmpStreamer._();
-    _channel.invokeMethod('getStreamerState');
-    await instance.stateStream.first;
+  Future<BackAndFrontResolutions> getResolutions() async {
 
+    if (!_initialized) {
+      throw 'FlutterRtmpStreamer not initialized!';
+    }
+
+    try {
+      final result = await _channel.invokeMethod('getResolutions');
+
+      return BackAndFrontResolutions.fromJson( jsonDecode(result) );
+    } catch (e) {
+      debugPrint("getResolutions failed: $e");
+      rethrow;
+    }
+  }
+
+  static Future<FlutterRtmpStreamer> init() async {
 
     if (!(await Permission.microphone.request().isGranted)) {
       throw 'We need microphone permission to stream';
@@ -267,6 +353,15 @@ class FlutterRtmpStreamer {
     if (!(await Permission.camera.request().isGranted)) {
       throw 'We need camera permission to stream';
     }
+
+    final instance = FlutterRtmpStreamer._();
+    _channel.invokeMethod('sendStreamerState');
+    await instance.stateStream.first;
+
+
+
+
+    instance._initialized = true;
 
     return instance;
   }

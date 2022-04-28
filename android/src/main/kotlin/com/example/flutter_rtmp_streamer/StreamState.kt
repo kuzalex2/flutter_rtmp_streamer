@@ -23,6 +23,10 @@ class Resolution(val width: Int, val height: Int){
 
 @Keep
 @Serializable
+internal class BackAndFrontResolutions(val back: List<Resolution>, val front: List<Resolution>)
+
+@Keep
+@Serializable
 class StreamState(
   val isStreaming: Boolean,
   val isOnPreview: Boolean,

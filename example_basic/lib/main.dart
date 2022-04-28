@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rtmp_streamer/flutter_rtmp_streamer.dart';
 
+import 'drawer.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -42,21 +44,17 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          leading: const Icon(
-            Icons.menu,
-          ),
-          title:const Text("FlutterRtmpStreamer")
-      ),
+      drawer: CameraSettingsDrawer(streamer),
+      appBar: _AppBar(),
       body: Stack(
         children: [
 
           Container(color: Colors.black,),
 
-          Center(
-              child: FlutterRtmpCameraPreview(controller: streamer),
-
-          ),
+          // Center(
+          //     child: FlutterRtmpCameraPreview(controller: streamer),
+          //
+          // ),
 
           NotificationListener(streamer: streamer),
 
@@ -82,6 +80,28 @@ class MainScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+class _AppBar extends StatelessWidget with PreferredSizeWidget {
+  const _AppBar({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+        leading: ElevatedButton(
+          onPressed: () { Scaffold.of(context).openDrawer(); },
+          child: const Icon(
+            Icons.menu,
+          ),
+        ),
+        title:const Text("FlutterRtmpStreamer")
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(50);
 }
 
 
