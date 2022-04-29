@@ -93,6 +93,110 @@ class StreamingState extends Equatable {
 }
 
 
+enum StreamingCameraFacing {
+  front,
+  back,
+}
+
+class StreamingSettings extends Equatable {
+  final bool serviceInBackground;
+  final StreamingCameraFacing cameraFacing;
+
+  final Resolution resolutionFront;
+  final Resolution resolutionBack;
+  final int videoFps;
+  final int videoBitrate;
+  final String h264profile;
+  final String stabilizationMode;
+
+  final int audioBitrate;
+  final int audioSampleRate;
+  final int audioChannelCount;
+
+  Resolution get resolution {
+    switch (cameraFacing) {
+      case StreamingCameraFacing.back: return resolutionBack;
+      case StreamingCameraFacing.front: return resolutionFront;
+    }
+  }
+
+
+  factory StreamingSettings.initial() => const StreamingSettings(
+    serviceInBackground: true,
+    cameraFacing : StreamingCameraFacing.front,
+    resolutionFront :Resolution(640, 480),
+    resolutionBack:Resolution(640, 480),
+    videoFps:30,
+    videoBitrate: 1024 * 1024,
+    h264profile: "main",
+    stabilizationMode: "",
+    audioBitrate: 64 * 1024,
+    audioSampleRate: 48000,
+    audioChannelCount: 2,
+  );
+
+  const StreamingSettings({
+    required this.serviceInBackground,
+    required this.cameraFacing,
+    required this.resolutionFront,
+    required this.resolutionBack,
+    required this.videoFps,
+    required this.videoBitrate,
+    required this.h264profile,
+    required this.stabilizationMode,
+    required this.audioBitrate,
+    required this.audioSampleRate,
+    required this.audioChannelCount,
+  });
+
+  StreamingSettings copyWith({
+    bool? serviceInBackground,
+    StreamingCameraFacing? cameraFacing,
+    Resolution? resolutionFront,
+    Resolution? resolutionBack,
+    int? videoFps,
+    int? videoBitrate,
+    String? h264profile,
+    String? stabilizationMode,
+    int? audioBitrate,
+    int? audioSampleRate,
+    int? audioChannelCount,
+  }) {
+    return StreamingSettings(
+      serviceInBackground: serviceInBackground ?? this.serviceInBackground,
+      cameraFacing: cameraFacing ?? this.cameraFacing,
+      resolutionFront: resolutionFront ?? this.resolutionFront,
+      resolutionBack: resolutionBack ?? this.resolutionBack,
+      videoFps: videoFps ?? this.videoFps,
+      videoBitrate: videoBitrate ?? this.videoBitrate,
+      h264profile: h264profile ?? this.h264profile,
+      stabilizationMode: stabilizationMode ?? this.stabilizationMode,
+      audioBitrate: audioBitrate ?? this.audioBitrate,
+      audioSampleRate: audioSampleRate ?? this.audioSampleRate,
+      audioChannelCount: audioChannelCount ?? this.audioChannelCount,
+
+    );
+  }
+
+  @override
+  List<Object> get props => [
+    serviceInBackground,
+    cameraFacing,
+    resolutionFront,
+    resolutionBack,
+    videoFps,
+    videoBitrate,
+    h264profile,
+    stabilizationMode,
+    audioBitrate,
+    audioSampleRate,
+    audioChannelCount,
+
+  ];
+
+}
+
+
 class BackAndFrontResolutions extends Equatable {
 
   final List<Resolution> _back;
