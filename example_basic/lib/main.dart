@@ -45,7 +45,7 @@ class MainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: CameraSettingsDrawer(streamer),
-      appBar: _AppBar(),
+      appBar: const _AppBar(),
       body: Stack(
         children: [
 
@@ -96,7 +96,7 @@ class _AppBar extends StatelessWidget with PreferredSizeWidget {
             Icons.menu,
           ),
         ),
-        title:const Text("FlutterRtmpStreamer")
+        title:const Text("FlutterRtmpStreamer Basic sample")
     );
   }
 
@@ -107,16 +107,13 @@ class _AppBar extends StatelessWidget with PreferredSizeWidget {
 
 class LeftControlBox extends StatelessWidget {
   const LeftControlBox({Key? key, required this.streamer}) : super(key: key);
-  final FlutterRtmpStreamer? streamer;
+  final FlutterRtmpStreamer streamer;
 
   @override
   Widget build(BuildContext context) {
-    if (streamer==null) {
-      return const Loader();
-    }
-
     return StreamBuilder<StreamingState>(
-        stream: streamer!.stateStream,
+        stream: streamer.stateStream,
+        initialData: streamer.state,
         builder: (context, snap) {
           if (!snap.hasData){
             return const Loader();
@@ -141,22 +138,20 @@ class LeftControlBox extends StatelessWidget {
 
 class RightControlBox extends StatelessWidget {
   const RightControlBox({Key? key, required this.streamer}) : super(key: key);
-  final FlutterRtmpStreamer? streamer;
+  final FlutterRtmpStreamer streamer;
 
   @override
   Widget build(BuildContext context) {
-    if (streamer==null) {
-      return const Loader();
-    }
+
 
     return ElevatedButton(
         onPressed: () {
           try {
 
-            if ( streamer!.state.isStreaming ) {
-              streamer!.stopStream();
+            if ( streamer.state.isStreaming ) {
+              streamer.stopStream();
             } else {
-              streamer!.startStream(
+              streamer.startStream(
                   uri: "rtmp://flutter-webrtc.kuzalex.com/live",
                   streamName: "one"
               );
@@ -168,11 +163,15 @@ class RightControlBox extends StatelessWidget {
             ));
           }
         },
-        child: StreamBuilder<Object>(
-            stream: streamer!.stateStream,
-            builder: (context, _) {
+        child: StreamBuilder<StreamingState>(
+            stream: streamer.stateStream,
+            initialData: streamer.state,
+            builder: (context, streamingState) {
+              if (!streamingState.hasData){
+                return const Loader();
+              }
               return Text(
-                  streamer!.state.isStreaming ? "Stop streaming" : "Start streaming"
+                  streamingState.data!.isStreaming ? "Stop streaming" : "Start streaming"
               );
             }
         )
