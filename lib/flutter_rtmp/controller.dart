@@ -20,11 +20,15 @@ class FlutterRtmpStreamer {
   /// The current [state].
   StreamingState get state => _state;
 
+  /// states from plugin: isStreaming, isOnPreview, etc...
+  ///
   StreamController<StreamingState>? __stateController;
   StreamController<StreamingState> get _stateController {
     return __stateController ??= StreamController<StreamingState>.broadcast();
   }
 
+  /// notifications from plugin: text mesages about errors, etc...
+  ///
   StreamController<StreamingNotification>? __nofiticationController;
   StreamController<StreamingNotification> get _nofiticationController {
     return __nofiticationController ??= StreamController<StreamingNotification>.broadcast();
@@ -37,6 +41,8 @@ class FlutterRtmpStreamer {
   Stream<StreamingNotification> get notificationStream => _nofiticationController.stream;
 
   bool _initialized = false;
+
+  StreamingSettings streamingSettings = StreamingSettings.initial();
 
 
   FlutterRtmpStreamer._(): _state = StreamingState.empty
