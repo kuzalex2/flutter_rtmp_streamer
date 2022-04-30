@@ -105,6 +105,12 @@ class RtpService : Service() {
     private var contextApp: Context? = null
     private var isRtmpConnected: Boolean = false
     private var dartMessenger:DartMessenger? = null
+    private var streamingSettings: StreamingSettings? = null;
+
+    fun setStreamingSettings(value: StreamingSettings) {
+      if (streamingSettings == null)
+        streamingSettings = value
+    }
 
     fun setView(openGlView: OpenGlView) {
       this.openGlView = openGlView
@@ -168,15 +174,30 @@ class RtpService : Service() {
       }
     }
 
+    private fun prepareVideo(it: StreamingSettings): Boolean{
+      return camera2Base!!.prepareVideo(
+        it.resolutionBack.width,
+        it.resolutionBack.height,
+        it.videoFps,
+        it.videoBitrate,
+        CameraHelper.getCameraOrientation(contextApp)
+      );
+    }
+
     private fun startStreamRtp(endpoint: String) {
-      if (!camera2Base!!.isStreaming) {
-        if (camera2Base!!.prepareVideo() && camera2Base!!.prepareAudio()) {
-          camera2Base!!.startStream(endpoint)
+
+      streamingSettings?.let {
+
+        if (!camera2Base!!.isStreaming) {
+
+          if (prepareVideo(it) && camera2Base!!.prepareAudio()) {
+            camera2Base!!.startStream(endpoint)
+          }
+        } else {
+          showNotification("You are already streaming :(")
         }
-      } else {
-        showNotification("You are already streaming :(")
+        sendCameraStatusToDart()
       }
-      sendCameraStatusToDart()
 
     }
 
@@ -210,7 +231,7 @@ class RtpService : Service() {
     ///
     ///
 
-    private fun getStreamingState():MutableMap<String, String>
+    private fun getStreamingState(streamingSettings: StreamingSettings):MutableMap<String, String>
     {
       val reply: MutableMap<String, String> = HashMap()
 
@@ -220,17 +241,21 @@ class RtpService : Service() {
         isAudioMuted = camera2Base!!.isAudioMuted,
         isRtmpConnected = isRtmpConnected,
         streamResolution = Resolution(width = camera2Base!!.streamWidth, height = camera2Base!!.streamHeight),
-        cameraOrientation = CameraHelper.getCameraOrientation(contextApp)
+        cameraOrientation = CameraHelper.getCameraOrientation(contextApp),
+        streamingSettings = streamingSettings,
       ));
 
       return reply
     }
 
     fun sendCameraStatusToDart() {
-      dartMessenger?.send(
-        "StreamingState",
-        getStreamingState()
-      )
+      streamingSettings?.let {
+        dartMessenger?.send(
+          "StreamingState",
+          getStreamingState( it )
+        )
+      }
+
     }
 
     private fun sendNotificationToDart(description: String) {
@@ -291,7 +316,17 @@ class RtpService : Service() {
       }
       this.sendNotificationToDart(text);
     }
+
+
+
+    fun changeVideoBitrate(value: Int){
+      if (!camera2Base!!.isStreaming && streamingSettings!=null) {
+        streamingSettings!!.videoBitrate = value;
+      }
+    }
   }
+
+
 
 
 

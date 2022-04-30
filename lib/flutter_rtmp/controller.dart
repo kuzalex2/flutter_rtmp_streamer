@@ -42,7 +42,22 @@ class FlutterRtmpStreamer {
 
   bool _initialized = false;
 
-  StreamingSettings streamingSettings = StreamingSettings.initial();
+  // setSettings(StreamingSettings settings) async {
+  //   await Future.delayed(const Duration(seconds: 2));
+  //   _state = _state.copyWith(streamingSettings: settings);
+  //   if (!_stateController.isClosed) {
+  //     _stateController.add(_state);
+  //   }
+  //
+  //
+  // }
+
+  _changeState(StreamingState newState) {
+    _state = newState;
+    if (!_stateController.isClosed) {
+      _stateController.add(_state);
+    }
+  }
 
 
   FlutterRtmpStreamer._(): _state = StreamingState.empty
@@ -57,11 +72,10 @@ class FlutterRtmpStreamer {
       ///
         case "StreamingState": {
 
+          _changeState(
+              StreamingState.fromJson( jsonDecode(event['streamState']) ).copyWith(inSettings: state.inSettings)
+          );
 
-          _state = StreamingState.fromJson( jsonDecode(event['streamState']) );
-          if (!_stateController.isClosed) {
-            _stateController.add(_state);
-          }
         }
         break;
 
@@ -89,6 +103,21 @@ class FlutterRtmpStreamer {
     });
   }
 
+  stopStream() async {
+
+    if (!_initialized) {
+      throw 'FlutterRtmpStreamer not initialized!';
+    }
+
+    try {
+      await _channel.invokeMethod('stopStream');
+    } catch (e) {
+      debugPrint("stopStream failed: $e");
+      rethrow;
+    }
+  }
+
+
   startStream({required String uri, required String streamName}) async {
     if (!_initialized) {
       throw 'FlutterRtmpStreamer not initialized!';
@@ -110,19 +139,7 @@ class FlutterRtmpStreamer {
     }
   }
 
-  stopStream() async {
 
-    if (!_initialized) {
-      throw 'FlutterRtmpStreamer not initialized!';
-    }
-
-    try {
-      await _channel.invokeMethod('stopStream');
-    } catch (e) {
-      debugPrint("stopStream failed: $e");
-      rethrow;
-    }
-  }
 
   Future<BackAndFrontResolutions> getResolutions() async {
 
@@ -140,30 +157,59 @@ class FlutterRtmpStreamer {
     }
   }
 
-  static Future<FlutterRtmpStreamer> init() async {
+  static Future<FlutterRtmpStreamer> init(StreamingSettings streamingSettings) async {
 
-    if (!(await Permission.microphone.request().isGranted)) {
-      throw 'We need microphone permission to stream';
+    try {
+      if (!(await Permission.microphone.request().isGranted)) {
+        throw 'We need microphone permission to stream';
+      }
+
+      if (!(await Permission.camera.request().isGranted)) {
+        throw 'We need camera permission to stream';
+      }
+
+      final instance = FlutterRtmpStreamer._();
+      await _channel.invokeMethod('init', {
+        'streamingSettings' : jsonEncode(streamingSettings.toJson())
+      });
+      await instance.stateStream.first;
+
+
+
+
+      instance._initialized = true;
+
+      return instance;
+    } catch (e) {
+      return Future.error(e);
     }
-
-    if (!(await Permission.camera.request().isGranted)) {
-      throw 'We need camera permission to stream';
-    }
-
-    final instance = FlutterRtmpStreamer._();
-    _channel.invokeMethod('sendStreamerState');
-    await instance.stateStream.first;
-
-
-
-
-    instance._initialized = true;
-
-    return instance;
   }
 
 
-  // _FlutterRtmpCameraPreview cameraPreview({Key? key}) => _FlutterRtmpCameraPreview(key: key,);
+  changeVideoBitrate(int bitrate) async {
+
+    if (!_initialized) {
+      throw 'FlutterRtmpStreamer not initialized!';
+    }
+
+    if (state.inSettings) {
+      return;
+    }
+
+    _changeState(
+        _state.copyWith(inSettings: true)
+    );
+
+    try {
+      await Future.delayed(const Duration(milliseconds: 400));
+      await _channel.invokeMethod('changeVideoBitrate', {'value': bitrate});
+    } catch (e) {
+      debugPrint("stopStream failed: $e");
+      rethrow;
+    } finally {
+      _changeState(_state.copyWith(inSettings: false));
+    }
+  }
 
 
   static Future<String?> get platformVersion async {

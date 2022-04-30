@@ -1,11 +1,24 @@
 import 'package:equatable/equatable.dart';
 import 'dart:collection';
 
+import 'package:json_annotation/json_annotation.dart';
+
+part 'model.g.dart';
+
+///
+/// fvm flutter packages pub run  build_runner build
+///
+///
+
+@JsonSerializable()
 class Resolution extends Equatable {
   final int width;
   final int height;
 
   const Resolution(this.width, this.height);
+
+  factory Resolution.fromJson(Map<String, dynamic> json) => _$ResolutionFromJson(json);
+  Map<String, dynamic> toJson() => _$ResolutionToJson(this);
 
   @override
   List<Object> get props => [
@@ -17,14 +30,15 @@ class Resolution extends Equatable {
   String toString() => "$width × $height";
 }
 
-
 enum StreamingCameraFacing {
+  @JsonValue('FRONT')
   front,
+  @JsonValue('BACK')
   back,
 }
 
 
-
+@JsonSerializable()
 class StreamingState extends Equatable {
 
   final bool isStreaming;
@@ -35,48 +49,54 @@ class StreamingState extends Equatable {
   final Resolution streamResolution;
   final int cameraOrientation;
 
+  final StreamingSettings streamingSettings;
 
-  const StreamingState._( {
+  @JsonKey(ignore: true)
+  final bool inSettings;
+
+  const StreamingState( {
     required this.isStreaming,
     required this.isOnPreview,
     required this.isAudioMuted,
     required this.isRtmpConnected,
     required this.streamResolution,
     required this.cameraOrientation,
+    required this.streamingSettings,
+    this.inSettings = false,
   });
 
-  static const empty = StreamingState._(isStreaming:false,isOnPreview: false,isAudioMuted: false,isRtmpConnected: false, streamResolution: Resolution(0,0), cameraOrientation: 0);
+  static const empty = StreamingState(
+      isStreaming:false,
+      isOnPreview: false,
+      isAudioMuted: false,
+      isRtmpConnected: false,
+      streamResolution: Resolution(0,0),
+      cameraOrientation: 0,
+      inSettings: false,
+      streamingSettings: StreamingSettings.initial,
+  );
 
   bool get isEmpty => this == empty;
   bool get isNotEmpty => !isEmpty;
 
-  factory StreamingState.fromJson(Map<String, dynamic> json) =>
-      StreamingState._(
-          isStreaming: json['isStreaming'] as bool,
-          isOnPreview: json['isOnPreview'] as bool,
-          isAudioMuted: json['isAudioMuted'] as bool,
-          isRtmpConnected: json['isRtmpConnected'] as bool,
-          cameraOrientation: json['cameraOrientation'] as int,
-          streamResolution: Resolution(
-            json['streamResolution']['width'] as int,
-            json['streamResolution']['height'] as int,
-          )
-      );
+  factory StreamingState.fromJson(Map<String, dynamic> json) => _$StreamingStateFromJson(json);
+  Map<String, dynamic> toJson() => _$StreamingStateToJson(this);
 
 
-  // StreamingState copyWith({
-  //   bool? isStreaming,
-  //   bool? isOnPreview,
-  //   bool? isAudioMuted,
-  //   bool? isRtmpConnected,
-  // }) {
-  //   return StreamingState(
-  //     isStreaming: isStreaming ?? this.isStreaming,
-  //     isOnPreview: isOnPreview ?? this.isOnPreview,
-  //     isAudioMuted: isAudioMuted ?? this.isAudioMuted,
-  //     isRtmpConnected: isRtmpConnected ?? this.isRtmpConnected,
-  //   );
-  // }
+  StreamingState copyWith({
+    bool? inSettings,
+  }) {
+    return StreamingState(
+      isStreaming: isStreaming,
+      isOnPreview: isOnPreview,
+      isAudioMuted: isAudioMuted,
+      isRtmpConnected: isRtmpConnected,
+      cameraOrientation: cameraOrientation,
+      streamResolution: streamResolution,
+      streamingSettings: streamingSettings,
+      inSettings: inSettings ?? this.inSettings,
+    );
+  }
 
   @override
   List<Object> get props => [
@@ -87,11 +107,16 @@ class StreamingState extends Equatable {
 
     streamResolution,
     cameraOrientation,
+    inSettings,
+
+    streamingSettings,
   ];
 }
 
 
-
+///
+///
+@JsonSerializable()
 class StreamingSettings extends Equatable {
   final bool serviceInBackground;
   final StreamingCameraFacing cameraFacing;
@@ -114,12 +139,11 @@ class StreamingSettings extends Equatable {
     }
   }
 
-
-  factory StreamingSettings.initial() => const StreamingSettings(
+  static const initial = StreamingSettings(
     serviceInBackground: true,
     cameraFacing : StreamingCameraFacing.front,
-    resolutionFront :Resolution(640, 480),
-    resolutionBack:Resolution(640, 480),
+    resolutionFront: Resolution(640, 480),
+    resolutionBack: Resolution(640, 480),
     videoFps:30,
     videoBitrate: 1024 * 1024,
     h264profile: "main",
@@ -143,34 +167,39 @@ class StreamingSettings extends Equatable {
     required this.audioChannelCount,
   });
 
-  StreamingSettings copyWith({
-    bool? serviceInBackground,
-    StreamingCameraFacing? cameraFacing,
-    Resolution? resolutionFront,
-    Resolution? resolutionBack,
-    int? videoFps,
-    int? videoBitrate,
-    String? h264profile,
-    String? stabilizationMode,
-    int? audioBitrate,
-    int? audioSampleRate,
-    int? audioChannelCount,
-  }) {
-    return StreamingSettings(
-      serviceInBackground: serviceInBackground ?? this.serviceInBackground,
-      cameraFacing: cameraFacing ?? this.cameraFacing,
-      resolutionFront: resolutionFront ?? this.resolutionFront,
-      resolutionBack: resolutionBack ?? this.resolutionBack,
-      videoFps: videoFps ?? this.videoFps,
-      videoBitrate: videoBitrate ?? this.videoBitrate,
-      h264profile: h264profile ?? this.h264profile,
-      stabilizationMode: stabilizationMode ?? this.stabilizationMode,
-      audioBitrate: audioBitrate ?? this.audioBitrate,
-      audioSampleRate: audioSampleRate ?? this.audioSampleRate,
-      audioChannelCount: audioChannelCount ?? this.audioChannelCount,
 
-    );
-  }
+  factory StreamingSettings.fromJson(Map<String, dynamic> json) => _$StreamingSettingsFromJson(json);
+  Map<String, dynamic> toJson() => _$StreamingSettingsToJson(this);
+
+
+  // StreamingSettings copyWith({
+  //   bool? serviceInBackground,
+  //   StreamingCameraFacing? cameraFacing,
+  //   Resolution? resolutionFront,
+  //   Resolution? resolutionBack,
+  //   int? videoFps,
+  //   int? videoBitrate,
+  //   String? h264profile,
+  //   String? stabilizationMode,
+  //   int? audioBitrate,
+  //   int? audioSampleRate,
+  //   int? audioChannelCount,
+  // }) {
+  //   return StreamingSettings(
+  //     serviceInBackground: serviceInBackground ?? this.serviceInBackground,
+  //     cameraFacing: cameraFacing ?? this.cameraFacing,
+  //     resolutionFront: resolutionFront ?? this.resolutionFront,
+  //     resolutionBack: resolutionBack ?? this.resolutionBack,
+  //     videoFps: videoFps ?? this.videoFps,
+  //     videoBitrate: videoBitrate ?? this.videoBitrate,
+  //     h264profile: h264profile ?? this.h264profile,
+  //     stabilizationMode: stabilizationMode ?? this.stabilizationMode,
+  //     audioBitrate: audioBitrate ?? this.audioBitrate,
+  //     audioSampleRate: audioSampleRate ?? this.audioSampleRate,
+  //     audioChannelCount: audioChannelCount ?? this.audioChannelCount,
+  //
+  //   );
+  // }
 
   @override
   List<Object> get props => [

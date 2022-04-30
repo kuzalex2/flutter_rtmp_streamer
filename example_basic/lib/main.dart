@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         body: FutureBuilder<FlutterRtmpStreamer>(
-          future: FlutterRtmpStreamer.init(),
+          future: FlutterRtmpStreamer.init(StreamingSettings.initial),
           builder: (context, snapshot) {
             if (snapshot.hasError){
               return ErrorWidget( error: snapshot.error.toString() );
@@ -151,9 +151,11 @@ class RightControlBox extends StatelessWidget {
             if ( streamer.state.isStreaming ) {
               streamer.stopStream();
             } else {
-              streamer.startStream(
-                  uri: "rtmp://flutter-webrtc.kuzalex.com/live",
-                  streamName: "one"
+              Future.delayed(const Duration(seconds: 2)).then((value) =>
+                streamer.startStream(
+                    uri: "rtmp://flutter-webrtc.kuzalex.com/live",
+                    streamName: "one"
+                )
               );
             }
 

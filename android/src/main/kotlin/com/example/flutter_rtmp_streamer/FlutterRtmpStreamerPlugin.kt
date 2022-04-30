@@ -49,7 +49,7 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
       DartMessenger(flutterPluginBinding.binaryMessenger, "flutter_rtmp_streamer/events")
     )
 
-    RtpService.sendCameraStatusToDart();
+//    RtpService.sendCameraStatusToDart();
 
     flutterPluginBinding
       .platformViewRegistry
@@ -75,8 +75,17 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
        *
        *
        */
-      "sendStreamerState" -> {
-        RtpService.sendCameraStatusToDart()
+      "init" -> {
+        try {
+          val streamingSettingsString: String = call.argument("streamingSettings")!!
+
+          RtpService.setStreamingSettings( Json.decodeFromString(StreamingSettings.serializer(), streamingSettingsString) )
+          RtpService.sendCameraStatusToDart()
+        } catch (e: Exception) {
+          result.error("init", e.toString(), null)
+          return;
+        }
+
         result.success( true )
         return
       }
@@ -159,6 +168,26 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
           return;
         }
 
+        return
+      }
+
+      /**
+       *
+       *
+       */
+      "changeVideoBitrate" -> {
+        try {
+          val value: Int = call.argument("value")!!
+
+          RtpService.changeVideoBitrate(value)
+
+          RtpService.sendCameraStatusToDart()
+        } catch (e: Exception) {
+          result.error("changeVideoBitrate", e.toString(), null)
+          return;
+        }
+
+        result.success( true )
         return
       }
 

@@ -6,6 +6,7 @@ package com.example.flutter_rtmp_streamer
 
 
 import androidx.annotation.Keep
+import com.pedro.encoder.input.video.CameraHelper
 import kotlinx.serialization.Serializable
 
 
@@ -34,7 +35,29 @@ class StreamState(
   val isRtmpConnected: Boolean,
   val streamResolution: Resolution,
   val cameraOrientation: Int,
+  val streamingSettings: StreamingSettings,
   ){
+  override fun toString(): String {
+    return ""
+  }
+}
+
+
+@Keep
+@Serializable
+class StreamingSettings(
+  val serviceInBackground: Boolean,
+  val resolutionFront: Resolution,
+  val resolutionBack: Resolution,
+  val videoFps: Int,
+  var videoBitrate: Int,
+  val h264profile: String,
+  val stabilizationMode: String,
+  val audioBitrate: Int,
+  val audioSampleRate: Int,
+  val audioChannelCount: Int,
+  val cameraFacing: CameraHelper.Facing,
+){
   override fun toString(): String {
     return ""
   }

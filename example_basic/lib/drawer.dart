@@ -149,6 +149,10 @@ class Tuple<A,B> {
   int get hashCode => name.hashCode;
 }
 
+class NamedValue<V> extends Tuple<V, String> {
+  const NamedValue(V value, String name) : super(value, name);
+}
+
 abstract class StreamStateStatelessWidget extends StatelessWidget {
   const StreamStateStatelessWidget({Key? key, required this.streamer}) : super(key: key);
   final FlutterRtmpStreamer streamer;
@@ -171,7 +175,7 @@ abstract class StreamStateStatelessWidget extends StatelessWidget {
   }
 }
 
-class ListDrawer<T> extends StreamStateStatelessWidget {
+class ListDrawer<T extends NamedValue> extends StreamStateStatelessWidget {
 
   const ListDrawer({
     Key? key,
@@ -189,25 +193,27 @@ class ListDrawer<T> extends StreamStateStatelessWidget {
 
   @override
   Widget builder(BuildContext context, StreamingState state) {
+
    return Drawer(
        child: Scaffold(
         appBar: AppBar(title: Text(title),),
         body: ListView(
           children: list.map((item) =>
               InkWell(
-                onTap: () {
-                  // Navigator.of(context).pop();
-                  // if (onNewActiveItem!=null)
-                  //   onNewActiveItem(r);
+                onTap: state.inSettings || state.isStreaming ? null : () {
+                  Navigator.of(context).pop();
+                  if (onSelected!=null) {
+                    onSelected!(item);
+                  }
                 },
                 child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 6),
                     decoration: BoxDecoration(
-                      color: item == selectedItem ? Colors.lightBlueAccent : const Color.fromRGBO(0, 0, 0, 0),
+                      color: item == selectedItem ? (state.isStreaming ? Colors.grey : Colors.lightBlueAccent) : const Color.fromRGBO(0, 0, 0, 0),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB (16,8,0,8),
-                      child: Text(item.toString()),
+                      child: Text(item.name),
                     )
                 ),
               )
@@ -226,12 +232,12 @@ class VideoBitrateOption extends StreamStateStatelessWidget {
 
   const VideoBitrateOption({Key? key, required FlutterRtmpStreamer streamer}) : super(key: key, streamer: streamer);
 
-  static const List<Tuple<int,String>> bitrates = [
-    Tuple(-1, "Auto"),
-    Tuple(1 * 1024  * 1024,"1 Mbit/s"), // 360p
-    Tuple(2 * 1024 * 1024, "2 Mbit/s"), // 480p
-    Tuple(5 * 1024 * 1024, "5 Mbit/s"), // 720p
-    Tuple(8 * 1024 * 1024, "8 Mbit/s"), // 1080p
+  static const List<NamedValue<int>> bitrates = [
+    NamedValue(-1, "Auto"),
+    NamedValue(1 * 1024  * 1024,"1 Mbit/s"), // 360p
+    NamedValue(2 * 1024 * 1024, "2 Mbit/s"), // 480p
+    NamedValue(5 * 1024 * 1024, "5 Mbit/s"), // 720p
+    NamedValue(8 * 1024 * 1024, "8 Mbit/s"), // 1080p
   ];
 
 
@@ -239,7 +245,7 @@ class VideoBitrateOption extends StreamStateStatelessWidget {
   Widget builder(BuildContext context, StreamingState state) {
 
     final selected = bitrates
-        .firstWhere((b) => b.value == streamer.streamingSettings.videoBitrate, orElse: () => const Tuple(0, ""));
+        .firstWhere((b) => b.value == state.streamingSettings.videoBitrate, orElse: () => const NamedValue(0, ""));
 
     return SettingsOption(
       text: "Bitrate",
@@ -247,25 +253,17 @@ class VideoBitrateOption extends StreamStateStatelessWidget {
       onTap: () =>
         Navigator.of(context).push(
             MaterialPageRoute(
-                builder: (BuildContext context) => ListDrawer<Tuple<int,String>>(
+                builder: (BuildContext context) => ListDrawer<NamedValue<int>>(
                   streamer: streamer,
                   title: "Bitrate:",
                   list: bitrates,
                   selectedItem: selected,
-                  onSelected: (Tuple<int,String> item) {},
-                  // activeItem: list.firstWhere((element) => widget._controller.initialParams.bitrate == element.value),
-                  // onNewActiveItem: (i) {
-                  //   widget._controller.initialParams.bitrate = i.value;
-                  //
-                  //
-                  //
-                  //
-                  //   setState(() {});
-                  // },
+                  onSelected: (item) =>
+                    streamer.changeVideoBitrate(item.value ),
                 )
             )
         ),
-      disabled: state.isStreaming,
+      disabled: state.inSettings || state.isStreaming,
     );
   }
 
