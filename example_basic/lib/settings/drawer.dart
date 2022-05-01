@@ -506,7 +506,7 @@ class AudioChannelsOption extends OptionsWidget {
 
 
   static const List<NamedValue<int>> list = [
-    NamedValue(-1, "Default"),
+    // NamedValue(-1, "Default"),
     NamedValue(1, "Mono"),
     NamedValue(2, "Stereo"),
   ];

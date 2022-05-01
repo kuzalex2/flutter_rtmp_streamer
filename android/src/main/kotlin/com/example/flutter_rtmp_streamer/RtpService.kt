@@ -204,13 +204,27 @@ class RtpService : Service() {
       );
     }
 
+    private fun prepareAudio(it: StreamingSettings): Boolean{
+      assert(it.audioChannelCount == -1 || it.audioChannelCount == 1 || it.audioChannelCount == 2);
+
+      return camera2Base!!.prepareAudio(
+        if (it.audioBitrate == -1) 65536 else it.audioBitrate,
+        if (it.audioSampleRate == -1) 32000 else it.audioSampleRate,
+        it.audioChannelCount != 1,
+        false, false
+      );
+    }
+
+
     private fun startStreamRtp(endpoint: String) {
 
       streamingSettings?.let {
 
         if (!camera2Base!!.isStreaming) {
 
-          if (prepareVideo(it) && camera2Base!!.prepareAudio()) {
+
+
+          if (prepareVideo(it) && prepareAudio(it)) {
             camera2Base!!.startStream(endpoint)
           }
         } else {
@@ -356,27 +370,45 @@ class RtpService : Service() {
         streamingSettings = newValue
       else {
 
-        if (newValue.serviceInBackground!=streamingSettings!!.serviceInBackground){
+        streamingSettings?.let {
+
           if (!camera2Base!!.isStreaming ) {
-            streamingSettings!!.serviceInBackground = newValue.serviceInBackground;
+
+            if (newValue.serviceInBackground!=it.serviceInBackground)
+              it.serviceInBackground = newValue.serviceInBackground
+
+
+            if (newValue.videoBitrate!=it.videoBitrate)
+              it.videoBitrate = newValue.videoBitrate
+
+            if (newValue.videoFps!=it.videoFps)
+              it.videoFps = newValue.videoFps
+
+            if (newValue.audioBitrate!=it.audioBitrate)
+              it.audioBitrate = newValue.audioBitrate
+
+            if (newValue.audioSampleRate!=it.audioSampleRate)
+              it.audioSampleRate = newValue.audioSampleRate
+
+            if (newValue.audioChannelCount!=it.audioChannelCount)
+              it.audioChannelCount = newValue.audioChannelCount
+
+          }
+
+
+
+          if (newValue.cameraFacing != streamingSettings!!.cameraFacing){
+            camera2Base?.switchCamera()
+            streamingSettings!!.cameraFacing = camera2Base!!.cameraFacing
           }
         }
 
-        if (newValue.cameraFacing != streamingSettings!!.cameraFacing){
-          camera2Base?.switchCamera()
-          streamingSettings!!.cameraFacing = camera2Base!!.cameraFacing
-        }
+
 
 //
         //  val resolutionFront: Resolution,
         //  val resolutionBack: Resolution,
-        //  val videoFps: Int,
-        //  var videoBitrate: Int,
-        //  val h264profile: String,
-        //  val stabilizationMode: String,
-        //  val audioBitrate: Int,
-        //  val audioSampleRate: Int,
-        //  val audioChannelCount: Int,
+
 
 
 

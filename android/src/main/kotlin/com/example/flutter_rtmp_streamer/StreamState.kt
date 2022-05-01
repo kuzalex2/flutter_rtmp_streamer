@@ -49,13 +49,13 @@ class StreamingSettings(
   var serviceInBackground: Boolean,
   val resolutionFront: Resolution,
   val resolutionBack: Resolution,
-  val videoFps: Int,
+  var videoFps: Int,
   var videoBitrate: Int,
   val h264profile: String,
   val stabilizationMode: String,
-  val audioBitrate: Int,
-  val audioSampleRate: Int,
-  val audioChannelCount: Int,
+  var audioBitrate: Int,
+  var audioSampleRate: Int,
+  var audioChannelCount: Int,
   var cameraFacing: CameraHelper.Facing,
 ){
   override fun toString(): String {
