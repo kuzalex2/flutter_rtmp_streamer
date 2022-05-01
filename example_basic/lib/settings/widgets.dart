@@ -42,12 +42,14 @@ class ListDrawer<T> extends StatelessWidget {
     required this.list,
     this.selectedItem,
     this.onSelected,
+    this.checkIsStreaming = true,
   }) : super(key: key);
 
   final String title;
   final List<T> list;
   final T? selectedItem;
   final Function(T)? onSelected;
+  final bool checkIsStreaming;
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +63,7 @@ class ListDrawer<T> extends StatelessWidget {
               return ListView(
                 children: list.map((item) =>
                     InkWell(
-                      onTap: state.inSettings || state.isStreaming ? null : () {
+                      onTap: state.inSettings || (checkIsStreaming && state.isStreaming) ? null : () {
                         Navigator.of(context).pop();
                         if (onSelected!=null) {
                           onSelected!(item);
@@ -70,7 +72,7 @@ class ListDrawer<T> extends StatelessWidget {
                       child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 6),
                           decoration: BoxDecoration(
-                            color: item == selectedItem ? (state.isStreaming ? Colors.grey : Colors.lightBlueAccent) : const Color.fromRGBO(0, 0, 0, 0),
+                            color: item == selectedItem ? ((checkIsStreaming && state.isStreaming) ? Colors.grey : Colors.lightBlueAccent) : const Color.fromRGBO(0, 0, 0, 0),
                           ),
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB (16,8,0,8),

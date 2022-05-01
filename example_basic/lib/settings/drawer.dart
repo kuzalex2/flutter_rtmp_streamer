@@ -240,6 +240,7 @@ class CameraFacingOption extends OptionsWidget {
               MaterialPageRoute(
                   builder: (BuildContext context) => ListDrawer<NamedValue<StreamingCameraFacing>>(
                     streamer: streamer,
+                    checkIsStreaming: false,
                     title: "Bitrate:",
                     list: list,
                     selectedItem: selected,
@@ -250,7 +251,7 @@ class CameraFacingOption extends OptionsWidget {
                   )
               )
           ),
-      disabled: streamingState.inSettings || streamingState.isStreaming,
+      disabled: streamingState.inSettings ,
     );
 
   }

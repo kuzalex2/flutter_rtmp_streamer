@@ -177,17 +177,19 @@ class RtpService : Service() {
     private fun prepareStreamRtp(baseContext: Context, endpoint: String) {
       stopStream()
       stopPreview()
-      if (endpoint.startsWith("rtmp")) {
-        camera2Base = if (openGlView == null) {
-          RtmpCamera2(baseContext, true, connectCheckerRtp)
+      if (camera2Base == null) {
+        if (endpoint.startsWith("rtmp")) {
+          camera2Base = if (openGlView == null) {
+            RtmpCamera2(baseContext, true, connectCheckerRtp)
+          } else {
+            RtmpCamera2(openGlView, connectCheckerRtp)
+          }
         } else {
-          RtmpCamera2(openGlView, connectCheckerRtp)
-        }
-      } else {
-        camera2Base = if (openGlView == null) {
-          RtspCamera2(baseContext, true, connectCheckerRtp)
-        } else {
-          RtspCamera2(openGlView, connectCheckerRtp)
+          camera2Base = if (openGlView == null) {
+            RtspCamera2(baseContext, true, connectCheckerRtp)
+          } else {
+            RtspCamera2(openGlView, connectCheckerRtp)
+          }
         }
       }
     }
@@ -325,13 +327,18 @@ class RtpService : Service() {
     }
 
     private fun showNotification(text: String) {
-      contextApp?.let {
-        val notification = NotificationCompat.Builder(it, channelId)
-          .setSmallIcon(android.R.drawable.presence_video_online)
-          .setContentTitle("RTP Stream")
-          .setContentText(text).build()
-        notificationManager?.notify(notifyId, notification)
+      streamingSettings?.let {
+        if (it.serviceInBackground) {
+          contextApp?.let {
+            val notification = NotificationCompat.Builder(it, channelId)
+              .setSmallIcon(android.R.drawable.presence_video_online)
+              .setContentTitle("RTP Stream")
+              .setContentText(text).build()
+            notificationManager?.notify(notifyId, notification)
+          }
+        }
       }
+
       this.sendNotificationToDart(text);
     }
 
@@ -354,14 +361,8 @@ class RtpService : Service() {
           camera2Base?.switchCamera()
           streamingSettings!!.cameraFacing = camera2Base!!.cameraFacing
         }
+
 //
-//        if (newValue.serviceInBackground!=streamingSettings!!.serviceInBackground){
-//          if (!camera2Base!!.isStreaming ) {
-//            streamingSettings!!.serviceInBackground = newValue.serviceInBackground;
-//          }
-//        }
-//
-        ///  var serviceInBackground: Boolean,
         //  val resolutionFront: Resolution,
         //  val resolutionBack: Resolution,
         //  val videoFps: Int,
@@ -371,7 +372,6 @@ class RtpService : Service() {
         //  val audioBitrate: Int,
         //  val audioSampleRate: Int,
         //  val audioChannelCount: Int,
-        //  val cameraFacing: CameraHelper.Facing,
 
 
 

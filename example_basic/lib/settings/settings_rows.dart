@@ -22,7 +22,7 @@ class SettingsSwitch extends StatelessWidget {
   Widget build(BuildContext context) {
     return  SettingsRow(
       left: Icon(iconData),
-      title: Text("($title)"),
+      title: Text(title),
       right: CupertinoSwitch(
         activeColor: Colors.blue,
         onChanged: disabled ? null : onChanged,
