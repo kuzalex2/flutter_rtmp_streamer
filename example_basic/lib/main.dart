@@ -52,10 +52,10 @@ class MainScreen extends StatelessWidget {
 
           Container(color: Colors.black,),
 
-          // Center(
-          //     child: FlutterRtmpCameraPreview(controller: streamer),
-          //
-          // ),
+          Center(
+              child: FlutterRtmpCameraPreview(controller: streamer),
+
+          ),
 
           NotificationListener(streamer: streamer),
 

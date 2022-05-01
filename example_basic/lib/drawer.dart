@@ -4,13 +4,15 @@ import 'package:example_basic/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rtmp_streamer/flutter_rtmp_streamer.dart';
 import 'package:unicons/unicons.dart';
+import 'dart:io' show Platform;
 
 
+//
+// extension _StreamingCameraFacing on StreamingCameraFacing {
+//
+//   String get name => toString().replaceAll('StreamingCameraFacing.', '');
+// }
 
-extension _StreamingCameraFacing on StreamingCameraFacing {
-
-  String get name => toString().replaceAll('StreamingCameraFacing.', '');
-}
 
 
 
@@ -22,6 +24,7 @@ class CameraSettingsDrawer extends StatelessWidget {
   ;
 
 
+
   @override
   Widget build(BuildContext context) {
 
@@ -30,81 +33,68 @@ class CameraSettingsDrawer extends StatelessWidget {
         appBar: AppBar(title: const Text("Settings:"),),
 
         body: StreamingStateBuilder(
-          streamer: streamer,
-          builder: (context, streamingState) {
-            return ListView(children:  [
+            streamer: streamer,
+            builder: (context, streamingState) {
+              return ListView(
+                children: [
 
 
-              ///
-              ///
-              /// Background streaming
+                  ///
+                  ///
+                  /// Background streaming
 
-              SettingsSwitch(
-                iconData: UniconsLine.wifi_router,
-                title: "Background streaming",
-                disabled: streamingState.isStreaming || streamingState.inSettings,
-                value: streamingState.streamingSettings.serviceInBackground,
-                onChanged: (bool value) => streamer.changeStreamingSettings(
-                    streamer.state.streamingSettings.copyWith(serviceInBackground: value)
-                ),
-              ),
+                  SettingsSwitch(
+                    iconData: UniconsLine.wifi_router,
+                    title: "Background streaming",
+                    disabled: streamingState.isStreaming || streamingState.inSettings,
+                    value: streamingState.streamingSettings.serviceInBackground,
+                    onChanged: (bool value) => streamer.changeStreamingSettings(
+                        streamer.state.streamingSettings.copyWith(serviceInBackground: value)
+                    ),
+                  ),
 
-              const SettingsLine(text: "VIDEO"),
+                  const SettingsLine(text: "VIDEO"),
 
-              VideoResolutionsOption(streamer, streamingState),
-
-
-              VideoBitrateOption(streamer, streamingState),
+                  VideoResolutionsOption(streamer, streamingState),
 
 
-              CameraFacingOption(streamer, streamingState),
+                  VideoBitrateOption(streamer, streamingState),
 
 
-              VideoFPSOption(streamer, streamingState),
+                  CameraFacingOption(streamer, streamingState),
+
+
+                  VideoFPSOption(streamer, streamingState),
+
+
+                  Visibility(
+                    visible: Platform.isIOS,
+                    child: H264ProfileOption(streamer, streamingState)
+                  ),
+
+
+
+                  Visibility(
+                      visible: Platform.isIOS,
+                      child: VideoStabilizationModeOption(streamer, streamingState)
+                  ),
 
 
 
 
+                  const SettingsLine(text: "AUDIO"),
+
+                  AudioBitrateOption(streamer, streamingState),
 
 
-
-                  // SettingsOption(
-                  //   text: "Profile (${streamingSettings.h264profile.toString()})",
-                  //   onTap: () {},
-                  //   disabled: streamingState.isStreaming,
-                  // ),
-                  //
-                  // SettingsOption(
-                  //   text: "Stabilization (${streamingSettings.stabilizationMode.toString()})",
-                  //   onTap: () {},
-                  //   disabled: streamingState.isStreaming,
-                  // ),
-                  //
+                  AudioSampleRateOption(streamer, streamingState),
 
 
-                  // const SettingsLine(text: "AUDIO"),
-                  //
-                  // SettingsOption(
-                  //   text: "Bitrate (${streamingSettings.audioBitrate.toString()})",
-                  //   onTap: () {},
-                  //   disabled: streamingState.isStreaming,
-                  // ),
-
-                  // SettingsOption(
-                  //   text: "Sample Rate (${streamingSettings.audioSampleRate.toString()})",
-                  //   onTap: () {},
-                  //   disabled: streamingState.isStreaming,
-                  // ),
-                  //
-                  // SettingsOption(
-                  //   text: "Channels Count (${streamingSettings.audioChannelCount.toString()})",
-                  //   onTap: () {},
-                  //   disabled: streamingState.isStreaming,
-                  // ),
+                  AudioChannelsOption(streamer, streamingState),
 
                 ],
-            );
-          }
+              );
+            }
         ),
       ),
     );
@@ -297,4 +287,247 @@ class VideoFPSOption extends OptionsWidget {
   }
 
 }
+
+
+///
+///
+///
+
+
+
+class H264ProfileOption extends OptionsWidget {
+
+  const H264ProfileOption(FlutterRtmpStreamer streamer, StreamingState streamingState, {Key? key}) : super(streamer, streamingState, key: key);
+
+  static const List<NamedValue<String>> list = [
+    NamedValue("baseline", "Baseline"),
+    NamedValue("main", "Main"),
+    NamedValue("high", "High"),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+
+
+    final selected = list
+        .firstWhere((b) => b.value == streamingState.streamingSettings.h264profile, orElse: () => const NamedValue("", ""));
+
+
+    return SettingsOption(
+      text: "Encoding Profile",
+      rightText: selected.name,
+      onTap: () =>
+          Navigator.of(context).push(
+              MaterialPageRoute(
+                  builder: (BuildContext context) => ListDrawer<NamedValue<String>>(
+                    streamer: streamer,
+                    title: "Choose Encoding Profile:",
+                    list: list,
+                    selectedItem: selected,
+                    onSelected: (item) =>
+                        streamer.changeStreamingSettings(
+                            streamer.state.streamingSettings.copyWith(h264profile: item.value)
+                        ),
+                  )
+              )
+          ),
+      disabled: streamingState.inSettings || streamingState.isStreaming,
+    );
+  }
+
+}
+
+
+///
+///
+///
+
+
+
+class VideoStabilizationModeOption extends OptionsWidget {
+
+  const VideoStabilizationModeOption(FlutterRtmpStreamer streamer, StreamingState streamingState, {Key? key}) : super(streamer, streamingState, key: key);
+
+  static const List<NamedValue<String>> list = [
+    NamedValue("off","Off"),
+    NamedValue("standard","Standard"),
+    NamedValue("cinematic","Cinematic"),
+    NamedValue("auto","Auto"),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+
+
+    final selected = list
+        .firstWhere((b) => b.value == streamingState.streamingSettings.stabilizationMode, orElse: () => const NamedValue("", ""));
+
+
+    return SettingsOption(
+      text: "Stabilization Mode",
+      rightText: selected.name,
+      onTap: () =>
+          Navigator.of(context).push(
+              MaterialPageRoute(
+                  builder: (BuildContext context) => ListDrawer<NamedValue<String>>(
+                    streamer: streamer,
+                    title: "Stabilization Mode:",
+                    list: list,
+                    selectedItem: selected,
+                    onSelected: (item) =>
+                        streamer.changeStreamingSettings(
+                            streamer.state.streamingSettings.copyWith(stabilizationMode: item.value)
+                        ),
+                  )
+              )
+          ),
+      disabled: streamingState.inSettings || streamingState.isStreaming,
+    );
+  }
+}
+
+
+
+///
+///
+///
+class AudioBitrateOption extends OptionsWidget {
+
+  const AudioBitrateOption(FlutterRtmpStreamer streamer, StreamingState streamingState, {Key? key}) : super(streamer, streamingState, key: key);
+
+
+  static const List<NamedValue<int>> bitrates = [
+    NamedValue(-1, "Default"),
+    NamedValue(96  * 1024, "96 Kb/s"),
+    NamedValue(128 * 1024, "128 Kb/s"),
+    NamedValue(160 * 1024, "160 Kb/s"),
+    NamedValue(256 * 1024, "256 Kb/s"),
+    NamedValue(320 * 1024, "320 Kb/s"),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+
+    final selected = bitrates
+        .firstWhere((b) => b.value == streamingState.streamingSettings.audioBitrate, orElse: () => const NamedValue(0, ""));
+
+    return SettingsOption(
+      text: "Bitrate",
+      rightText: selected.name,
+      onTap: () =>
+          Navigator.of(context).push(
+              MaterialPageRoute(
+                  builder: (BuildContext context) => ListDrawer<NamedValue<int>>(
+                    streamer: streamer,
+                    title: "Audio Bitrate:",
+                    list: bitrates,
+                    selectedItem: selected,
+                    onSelected: (item) =>
+                        streamer.changeStreamingSettings(
+                            streamer.state.streamingSettings.copyWith(audioBitrate: item.value)
+                        ),
+                  )
+              )
+          ),
+      disabled: streamingState.inSettings || streamingState.isStreaming,
+    );
+  }
+
+}
+
+
+
+///
+///
+///
+class AudioSampleRateOption extends OptionsWidget {
+
+  const AudioSampleRateOption(FlutterRtmpStreamer streamer, StreamingState streamingState, {Key? key}) : super(streamer, streamingState, key: key);
+
+
+  static const List<NamedValue<int>> list = [
+    NamedValue(-1, "Default"),
+    NamedValue(48000, "48 KHz"),
+    NamedValue(44100, "44.1 KHz"),
+    NamedValue(32000, "32 KHz"),
+    NamedValue(24000, "24 KHz"),
+    NamedValue(22050, "22.05 KHz"),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+
+    final selected = list
+        .firstWhere((b) => b.value == streamingState.streamingSettings.audioSampleRate, orElse: () => const NamedValue(0, ""));
+
+    return SettingsOption(
+      text: "Sample Rate",
+      rightText: selected.name,
+      onTap: () =>
+          Navigator.of(context).push(
+              MaterialPageRoute(
+                  builder: (BuildContext context) => ListDrawer<NamedValue<int>>(
+                    streamer: streamer,
+                    title: "Audio Sample Rate:",
+                    list: list,
+                    selectedItem: selected,
+                    onSelected: (item) =>
+                        streamer.changeStreamingSettings(
+                            streamer.state.streamingSettings.copyWith(audioSampleRate: item.value)
+                        ),
+                  )
+              )
+          ),
+      disabled: streamingState.inSettings || streamingState.isStreaming,
+    );
+  }
+
+}
+
+
+///
+///
+///
+class AudioChannelsOption extends OptionsWidget {
+
+  const AudioChannelsOption(FlutterRtmpStreamer streamer, StreamingState streamingState, {Key? key}) : super(streamer, streamingState, key: key);
+
+
+  static const List<NamedValue<int>> list = [
+    NamedValue(-1, "Default"),
+    NamedValue(1, "Mono"),
+    NamedValue(2, "Stereo"),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+
+    final selected = list
+        .firstWhere((b) => b.value == streamingState.streamingSettings.audioChannelCount, orElse: () => const NamedValue(0, ""));
+
+    return SettingsOption(
+      text: "Channels",
+      rightText: selected.name,
+      onTap: () =>
+          Navigator.of(context).push(
+              MaterialPageRoute(
+                  builder: (BuildContext context) => ListDrawer<NamedValue<int>>(
+                    streamer: streamer,
+                    title: "Audio Channels:",
+                    list: list,
+                    selectedItem: selected,
+                    onSelected: (item) =>
+                        streamer.changeStreamingSettings(
+                            streamer.state.streamingSettings.copyWith(audioChannelCount: item.value)
+                        ),
+                  )
+              )
+          ),
+      disabled: streamingState.inSettings || streamingState.isStreaming,
+    );
+  }
+
+}
+
+
 
