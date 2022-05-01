@@ -79,7 +79,7 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
         try {
           val streamingSettingsString: String = call.argument("streamingSettings")!!
 
-          RtpService.setStreamingSettings( Json.decodeFromString(StreamingSettings.serializer(), streamingSettingsString) )
+          RtpService.changeStreamingSettings( Json.decodeFromString(StreamingSettings.serializer(), streamingSettingsString) )
           RtpService.sendCameraStatusToDart()
         } catch (e: Exception) {
           result.error("init", e.toString(), null)
@@ -191,39 +191,19 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
         return
       }
 
-      /**
-       *
-       *
-       */
-      "changeVideoBitrate" -> {
-        try {
-          val value: Int = call.argument("value")!!
-
-          RtpService.changeVideoBitrate(value)
-
-          RtpService.sendCameraStatusToDart()
-        } catch (e: Exception) {
-          result.error("changeVideoBitrate", e.toString(), null)
-          return;
-        }
-
-        result.success( true )
-        return
-      }
 
       /**
        *
        *
        */
-      "changeBgMode" -> {
+      "changeStreamingSettings" -> {
         try {
-          val value: Boolean = call.argument("value")!!
+          val streamingSettingsString: String = call.argument("streamingSettings")!!
 
-          RtpService.changeBgMode(value)
-
+          RtpService.changeStreamingSettings( Json.decodeFromString(StreamingSettings.serializer(), streamingSettingsString) )
           RtpService.sendCameraStatusToDart()
         } catch (e: Exception) {
-          result.error("changeVideoBitrate", e.toString(), null)
+          result.error("changeStreamingSettings", e.toString(), null)
           return;
         }
 

@@ -172,34 +172,34 @@ class StreamingSettings extends Equatable {
   Map<String, dynamic> toJson() => _$StreamingSettingsToJson(this);
 
 
-  // StreamingSettings copyWith({
-  //   bool? serviceInBackground,
-  //   StreamingCameraFacing? cameraFacing,
-  //   Resolution? resolutionFront,
-  //   Resolution? resolutionBack,
-  //   int? videoFps,
-  //   int? videoBitrate,
-  //   String? h264profile,
-  //   String? stabilizationMode,
-  //   int? audioBitrate,
-  //   int? audioSampleRate,
-  //   int? audioChannelCount,
-  // }) {
-  //   return StreamingSettings(
-  //     serviceInBackground: serviceInBackground ?? this.serviceInBackground,
-  //     cameraFacing: cameraFacing ?? this.cameraFacing,
-  //     resolutionFront: resolutionFront ?? this.resolutionFront,
-  //     resolutionBack: resolutionBack ?? this.resolutionBack,
-  //     videoFps: videoFps ?? this.videoFps,
-  //     videoBitrate: videoBitrate ?? this.videoBitrate,
-  //     h264profile: h264profile ?? this.h264profile,
-  //     stabilizationMode: stabilizationMode ?? this.stabilizationMode,
-  //     audioBitrate: audioBitrate ?? this.audioBitrate,
-  //     audioSampleRate: audioSampleRate ?? this.audioSampleRate,
-  //     audioChannelCount: audioChannelCount ?? this.audioChannelCount,
-  //
-  //   );
-  // }
+  StreamingSettings copyWith({
+    bool? serviceInBackground,
+    StreamingCameraFacing? cameraFacing,
+    Resolution? resolutionFront,
+    Resolution? resolutionBack,
+    int? videoFps,
+    int? videoBitrate,
+    String? h264profile,
+    String? stabilizationMode,
+    int? audioBitrate,
+    int? audioSampleRate,
+    int? audioChannelCount,
+  }) {
+    return StreamingSettings(
+      serviceInBackground: serviceInBackground ?? this.serviceInBackground,
+      cameraFacing: cameraFacing ?? this.cameraFacing,
+      resolutionFront: resolutionFront ?? this.resolutionFront,
+      resolutionBack: resolutionBack ?? this.resolutionBack,
+      videoFps: videoFps ?? this.videoFps,
+      videoBitrate: videoBitrate ?? this.videoBitrate,
+      h264profile: h264profile ?? this.h264profile,
+      stabilizationMode: stabilizationMode ?? this.stabilizationMode,
+      audioBitrate: audioBitrate ?? this.audioBitrate,
+      audioSampleRate: audioSampleRate ?? this.audioSampleRate,
+      audioChannelCount: audioChannelCount ?? this.audioChannelCount,
+
+    );
+  }
 
   @override
   List<Object> get props => [

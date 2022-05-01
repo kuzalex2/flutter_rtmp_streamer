@@ -1,4 +1,3 @@
-
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -12,7 +11,8 @@ class FlutterRtmpStreamer {
 
   /// native -> flutter channel
   ///
-  static const EventChannel _inputChannel =  EventChannel('flutter_rtmp_streamer/events');
+  static const EventChannel _inputChannel =
+      EventChannel('flutter_rtmp_streamer/events');
   static final Stream _events = _inputChannel.receiveBroadcastStream();
 
   StreamingState _state;
@@ -31,14 +31,16 @@ class FlutterRtmpStreamer {
   ///
   StreamController<StreamingNotification>? __nofiticationController;
   StreamController<StreamingNotification> get _nofiticationController {
-    return __nofiticationController ??= StreamController<StreamingNotification>.broadcast();
+    return __nofiticationController ??=
+        StreamController<StreamingNotification>.broadcast();
   }
-
 
   /// The current state stream.
   Stream<StreamingState> get stateStream => _stateController.stream;
+
   /// Notifications from streaming module
-  Stream<StreamingNotification> get notificationStream => _nofiticationController.stream;
+  Stream<StreamingNotification> get notificationStream =>
+      _nofiticationController.stream;
 
   bool _initialized = false;
 
@@ -59,52 +61,43 @@ class FlutterRtmpStreamer {
     }
   }
 
-
-  FlutterRtmpStreamer._(): _state = StreamingState.empty
-  {
+  FlutterRtmpStreamer._() : _state = StreamingState.empty {
     _events.listen((event) {
       debugPrint('$event');
 
-      switch (event['eventType']){
+      switch (event['eventType']) {
 
-      ///
-      ///
-      ///
-        case "StreamingState": {
-
-          _changeState(
-              StreamingState.fromJson( jsonDecode(event['streamState']) ).copyWith(inSettings: state.inSettings)
-          );
-
-        }
-        break;
-
-      ///
-      ///
-      ///
-        case "Notification": {
-          final notification = StreamingNotification(description: event['description']);
-          if (!_nofiticationController.isClosed) {
-            _nofiticationController.add(notification);
+        ///
+        ///
+        ///
+        case "StreamingState":
+          {
+            _changeState(
+                StreamingState.fromJson(jsonDecode(event['streamState']))
+                    .copyWith(inSettings: state.inSettings));
           }
+          break;
 
-        }
-        break;
+        ///
+        ///
+        ///
+        case "Notification":
+          {
+            final notification =
+                StreamingNotification(description: event['description']);
+            if (!_nofiticationController.isClosed) {
+              _nofiticationController.add(notification);
+            }
+          }
+          break;
 
         default:
           debugPrint("Unknown event");
       }
-
-
-
-
-
-
     });
   }
 
   stopStream() async {
-
     if (!_initialized) {
       throw 'FlutterRtmpStreamer not initialized!';
     }
@@ -117,32 +110,24 @@ class FlutterRtmpStreamer {
     }
   }
 
-
   startStream({required String uri, required String streamName}) async {
     if (!_initialized) {
       throw 'FlutterRtmpStreamer not initialized!';
     }
 
     try {
-      await _channel.invokeMethod(
-          'startStream',
-          {
-            // 'muteAudio': value.isAudioMuted,
-            'uri': uri,
-            'streamName': streamName,
-          }
-      );
-
+      await _channel.invokeMethod('startStream', {
+        // 'muteAudio': value.isAudioMuted,
+        'uri': uri,
+        'streamName': streamName,
+      });
     } catch (e) {
       debugPrint("startStream failed: $e");
       rethrow;
     }
   }
 
-
-
   Future<BackAndFrontResolutions> getResolutions() async {
-
     if (!_initialized) {
       throw 'FlutterRtmpStreamer not initialized!';
     }
@@ -150,15 +135,15 @@ class FlutterRtmpStreamer {
     try {
       final result = await _channel.invokeMethod('getResolutions');
 
-      return BackAndFrontResolutions.fromJson( jsonDecode(result) );
+      return BackAndFrontResolutions.fromJson(jsonDecode(result));
     } catch (e) {
       debugPrint("getResolutions failed: $e");
       rethrow;
     }
   }
 
-  static Future<FlutterRtmpStreamer> init(StreamingSettings streamingSettings) async {
-
+  static Future<FlutterRtmpStreamer> init(
+      StreamingSettings streamingSettings) async {
     try {
       if (!(await Permission.microphone.request().isGranted)) {
         throw 'We need microphone permission to stream';
@@ -169,13 +154,9 @@ class FlutterRtmpStreamer {
       }
 
       final instance = FlutterRtmpStreamer._();
-      await _channel.invokeMethod('init', {
-        'streamingSettings' : jsonEncode(streamingSettings.toJson())
-      });
+      await _channel.invokeMethod('init',
+          {'streamingSettings': jsonEncode(streamingSettings.toJson())});
       await instance.stateStream.first;
-
-
-
 
       instance._initialized = true;
 
@@ -185,9 +166,7 @@ class FlutterRtmpStreamer {
     }
   }
 
-
-  changeVideoBitrate(int bitrate) async {
-
+  changeStreamingSettings(StreamingSettings newValue) async {
     if (!_initialized) {
       throw 'FlutterRtmpStreamer not initialized!';
     }
@@ -196,46 +175,19 @@ class FlutterRtmpStreamer {
       return;
     }
 
-    _changeState(
-        _state.copyWith(inSettings: true)
-    );
+    _changeState(_state.copyWith(inSettings: true));
 
     try {
       await Future.delayed(const Duration(milliseconds: 400));
-      await _channel.invokeMethod('changeVideoBitrate', {'value': bitrate});
+      await _channel.invokeMethod(
+          'changeStreamingSettings', {'streamingSettings': jsonEncode(newValue.toJson())});
     } catch (e) {
-      debugPrint("changeVideoBitrate failed: $e");
+      debugPrint("changeStreamingSettings failed: $e");
       rethrow;
     } finally {
       _changeState(_state.copyWith(inSettings: false));
     }
   }
-
-  changeBgMode(bool value) async {
-
-    if (!_initialized) {
-      throw 'FlutterRtmpStreamer not initialized!';
-    }
-
-    if (state.inSettings) {
-      return;
-    }
-
-    _changeState(
-        _state.copyWith(inSettings: true)
-    );
-
-    try {
-      await Future.delayed(const Duration(milliseconds: 400));
-      await _channel.invokeMethod('changeBgMode', {'value': value});
-    } catch (e) {
-      debugPrint("changeBgMode failed: $e");
-      rethrow;
-    } finally {
-      _changeState(_state.copyWith(inSettings: false));
-    }
-  }
-
 
   static Future<String?> get platformVersion async {
     final String? version = await _channel.invokeMethod('getPlatformVersion');

@@ -107,10 +107,10 @@ class RtpService : Service() {
     private var dartMessenger:DartMessenger? = null
     private var streamingSettings: StreamingSettings? = null;
 
-    fun setStreamingSettings(value: StreamingSettings) {
-      if (streamingSettings == null)
-        streamingSettings = value
-    }
+//    fun setStreamingSettings(value: StreamingSettings) {
+//      if (streamingSettings == null)
+//        streamingSettings = value
+//    }
 
     fun getStreamingSettings(): StreamingSettings? {
       return streamingSettings;
@@ -325,17 +325,50 @@ class RtpService : Service() {
 
 
 
-    fun changeVideoBitrate(value: Int){
-      if (!camera2Base!!.isStreaming && streamingSettings!=null) {
-        streamingSettings!!.videoBitrate = value;
+
+    fun changeStreamingSettings(newValue: StreamingSettings) {
+
+      if (streamingSettings == null)
+        streamingSettings = newValue
+      else {
+
+        if (newValue.serviceInBackground!=streamingSettings!!.serviceInBackground){
+          if (!camera2Base!!.isStreaming ) {
+            streamingSettings!!.serviceInBackground = newValue.serviceInBackground;
+          }
+        }
+//
+//        if (newValue.serviceInBackground!=streamingSettings!!.serviceInBackground){
+//          if (!camera2Base!!.isStreaming ) {
+//            streamingSettings!!.serviceInBackground = newValue.serviceInBackground;
+//          }
+//        }
+//
+        ///  var serviceInBackground: Boolean,
+        //  val resolutionFront: Resolution,
+        //  val resolutionBack: Resolution,
+        //  val videoFps: Int,
+        //  var videoBitrate: Int,
+        //  val h264profile: String,
+        //  val stabilizationMode: String,
+        //  val audioBitrate: Int,
+        //  val audioSampleRate: Int,
+        //  val audioChannelCount: Int,
+        //  val cameraFacing: CameraHelper.Facing,
+
+
+
       }
     }
 
-    fun changeBgMode(value: Boolean){
-      if (!camera2Base!!.isStreaming && streamingSettings!=null) {
-        streamingSettings!!.serviceInBackground = value;
-      }
-    }
+
+//    fun changeVideoBitrate(value: Int){
+//      if (!camera2Base!!.isStreaming && streamingSettings!=null) {
+//        streamingSettings!!.videoBitrate = value;
+//      }
+//    }
+
+
 
 
   }
