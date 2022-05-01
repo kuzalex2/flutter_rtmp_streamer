@@ -343,6 +343,11 @@ class RtpService : Service() {
     }
 
 
+    fun setStreamingSettings(newValue: StreamingSettings) {
+
+      if (streamingSettings == null)
+        streamingSettings = newValue
+    }
 
 
     fun changeStreamingSettings(newValue: StreamingSettings) {

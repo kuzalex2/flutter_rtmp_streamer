@@ -79,7 +79,7 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
         try {
           val streamingSettingsString: String = call.argument("streamingSettings")!!
 
-          RtpService.changeStreamingSettings( Json.decodeFromString(StreamingSettings.serializer(), streamingSettingsString) )
+          RtpService.setStreamingSettings( Json.decodeFromString(StreamingSettings.serializer(), streamingSettingsString) )
           RtpService.sendCameraStatusToDart()
         } catch (e: Exception) {
           result.error("init", e.toString(), null)
@@ -221,7 +221,7 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
 
 
     RtpService.getStreamingSettings()?.let {
-      if (it.serviceInBackground){
+      if (!it.serviceInBackground){
         RtpService.stopStream();
       }
     }

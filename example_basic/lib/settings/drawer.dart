@@ -43,13 +43,16 @@ class CameraSettingsDrawer extends StatelessWidget {
                   ///
                   /// Background streaming
 
-                  SettingsSwitch(
-                    iconData: UniconsLine.wifi_router,
-                    title: "Background streaming",
-                    disabled: streamingState.isStreaming || streamingState.inSettings,
-                    value: streamingState.streamingSettings.serviceInBackground,
-                    onChanged: (bool value) => streamer.changeStreamingSettings(
-                        streamer.state.streamingSettings.copyWith(serviceInBackground: value)
+                  Visibility(
+                    visible: Platform.isAndroid,
+                    child: SettingsSwitch(
+                      iconData: UniconsLine.wifi_router,
+                      title: "Background streaming",
+                      disabled: streamingState.isStreaming || streamingState.inSettings,
+                      value: streamingState.streamingSettings.serviceInBackground,
+                      onChanged: (bool value) => streamer.changeStreamingSettings(
+                          streamer.state.streamingSettings.copyWith(serviceInBackground: value)
+                      ),
                     ),
                   ),
 
