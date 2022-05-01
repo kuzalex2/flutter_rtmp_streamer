@@ -55,12 +55,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-
-
     return MaterialApp(
       home: Scaffold(
         body: FutureBuilder<FlutterRtmpStreamer>(
+             ///
+             /// Initialize FlutterRtmpStreamer with default configuration
+             /// 
             future: FlutterRtmpStreamer.init(StreamingSettings.initial),
             builder: (context, snapshot) {
               if (snapshot.hasError){
@@ -68,6 +68,7 @@ class MyApp extends StatelessWidget {
                     child: Text(snapshot.error.toString())
                 );
               }
+              
               if (!snapshot.hasData) {
                 return const CupertinoActivityIndicator();
               }
@@ -92,13 +93,22 @@ class MainScreen extends StatelessWidget {
 
           Container(color: Colors.black,),
 
+          ///
+          /// LIVE PREVIEW
+          /// 
           Center(
             child: FlutterRtmpCameraPreview(controller: streamer),
-
           ),
 
+          ///
+          /// Notifications
+          /// 
           NotificationListener(streamer: streamer),
 
+
+          ///
+          /// CONTROLS
+          /// 
           Center(
             child: Container(
               decoration: const BoxDecoration(
@@ -115,8 +125,6 @@ class MainScreen extends StatelessWidget {
               ]),
             ),
           ),
-
-
         ],
       ),
     );
@@ -140,7 +148,7 @@ class LeftControlBox extends StatelessWidget {
             return const CupertinoActivityIndicator();
           }
 
-          final streamingState= snap.data!;
+          final streamingState = snap.data!;
 
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -163,8 +171,7 @@ class RightControlBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-
+    
     return ElevatedButton(
         onPressed: () {
           try {
@@ -174,7 +181,10 @@ class RightControlBox extends StatelessWidget {
             } else {
               Future.delayed(const Duration(seconds: 2)).then((value) =>
                   streamer.startStream(
-                      uri: "rtmp://flutter-webrtc.kuzalex.com/live",
+                      ///
+                      /// Put real rtmp address here... 
+                      /// 
+                      uri: "rtmp://xyz.com/live",
                       streamName: "one"
                   )
               );
@@ -230,4 +240,4 @@ class NotificationListener extends StatelessWidget {
 ```
 
 A more complete example of doing rtmp streaming is in the
-[example code](https://github.com/kuzalex2/flutterrtmp_streamer/tree/develop/example)
+[example code](https://github.com/kuzalex2/flutter_rtmp_streamer/tree/develop/example)
