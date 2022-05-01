@@ -56,7 +56,7 @@ class StreamingSettings(
   val audioBitrate: Int,
   val audioSampleRate: Int,
   val audioChannelCount: Int,
-  val cameraFacing: CameraHelper.Facing,
+  var cameraFacing: CameraHelper.Facing,
 ){
   override fun toString(): String {
     return ""

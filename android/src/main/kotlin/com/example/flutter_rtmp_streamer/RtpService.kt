@@ -130,7 +130,19 @@ class RtpService : Service() {
     }
 
     fun startPreview() {
-      camera2Base?.startPreview()
+      streamingSettings?.let {
+
+        when(it.cameraFacing) {
+          CameraHelper.Facing.BACK ->
+            camera2Base?.startPreview(it.cameraFacing, it.resolutionBack.width, it.resolutionBack.height)
+
+          CameraHelper.Facing.FRONT ->
+            camera2Base?.startPreview(it.cameraFacing, it.resolutionFront.width, it.resolutionFront.height);
+
+        }
+
+
+      }
       sendCameraStatusToDart()
 
     }
@@ -336,6 +348,11 @@ class RtpService : Service() {
           if (!camera2Base!!.isStreaming ) {
             streamingSettings!!.serviceInBackground = newValue.serviceInBackground;
           }
+        }
+
+        if (newValue.cameraFacing != streamingSettings!!.cameraFacing){
+          camera2Base?.switchCamera()
+          streamingSettings!!.cameraFacing = camera2Base!!.cameraFacing
         }
 //
 //        if (newValue.serviceInBackground!=streamingSettings!!.serviceInBackground){

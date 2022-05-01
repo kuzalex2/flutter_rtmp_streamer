@@ -141,7 +141,7 @@ class StreamingSettings extends Equatable {
 
   static const initial = StreamingSettings(
     serviceInBackground: true,
-    cameraFacing : StreamingCameraFacing.front,
+    cameraFacing : StreamingCameraFacing.back,
     resolutionFront: Resolution(640, 480),
     resolutionBack: Resolution(640, 480),
     videoFps:30,
@@ -249,49 +249,7 @@ class BackAndFrontResolutions extends Equatable {
   ];
 
 }
-// class BackAndFrontResolutions extends Equatable {
-//
-//   final List<Resolution> _back;
-//   final List<Resolution> _front;
-//
-//   UnmodifiableListView<Resolution> get back =>
-//       UnmodifiableListView<Resolution>(_back);
-//
-//   UnmodifiableListView<Resolution> get front =>
-//       UnmodifiableListView<Resolution>(_front);
-//
-//   const BackAndFrontResolutions._({required List<Resolution> back, required List<Resolution> front}):
-//         _back = back,
-//         _front = front
-//   ;
-//
-//   static const empty = BackAndFrontResolutions._(back:[], front: [],);
-//   bool get isEmpty => this == empty;
-//   bool get isNotEmpty => !isEmpty;
-//
-//   factory BackAndFrontResolutions.fromJson(Map<String, dynamic> json) =>
-//       BackAndFrontResolutions._(
-//         back: (json['back'] as List<dynamic>).map((e) =>
-//             Resolution(
-//               ((e as Map<String, dynamic>)["width"]) as int,
-//               ((e)["height"]) as int,
-//             )
-//         ).toList(),
-//
-//         front: (json['front'] as List<dynamic>).map((e) =>
-//             Resolution(
-//               ((e as Map<String, dynamic>)["width"]) as int,
-//               ((e)["height"]) as int,
-//             )
-//         ).toList(),
-//       );
-//
-//   @override
-//   List<Object> get props => [
-//     _back,
-//     _front,
-//   ];
-// }
+
 
 
 class StreamingNotification extends Equatable {

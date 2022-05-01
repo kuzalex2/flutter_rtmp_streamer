@@ -216,12 +216,22 @@ class VideoBitrateOption extends OptionsWidget {
 
 class CameraFacingOption extends OptionsWidget {
 
+  static const list =  [
+      NamedValue(StreamingCameraFacing.front, "front"),
+      NamedValue(StreamingCameraFacing.back, "back"),
+  ];
+
   const CameraFacingOption(FlutterRtmpStreamer streamer, StreamingState streamingState, {Key? key}) : super(streamer, streamingState, key: key);
 
 
 
   @override
   Widget build(BuildContext context) {
+
+    final selected = list
+        .firstWhere((b) => b.value == streamingState.streamingSettings.cameraFacing, orElse: () => const NamedValue(StreamingCameraFacing.back, ""));
+
+
     return SettingsOption(
       text: "Camera Facing",
       rightText: streamingState.streamingSettings.cameraFacing.name,
@@ -231,10 +241,8 @@ class CameraFacingOption extends OptionsWidget {
                   builder: (BuildContext context) => ListDrawer<NamedValue<StreamingCameraFacing>>(
                     streamer: streamer,
                     title: "Bitrate:",
-                    list: const [
-                      NamedValue<StreamingCameraFacing>(StreamingCameraFacing.front, "front"),
-                      NamedValue<StreamingCameraFacing>(StreamingCameraFacing.back, "back"),
-                    ],
+                    list: list,
+                    selectedItem: selected,
                     onSelected: (item) =>
                         streamer.changeStreamingSettings(
                             streamer.state.streamingSettings.copyWith(cameraFacing: item.value)
