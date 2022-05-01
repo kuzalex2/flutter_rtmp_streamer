@@ -1,9 +1,9 @@
-import 'package:example_basic/widgets.dart';
+import 'package:example_basic/settings/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rtmp_streamer/flutter_rtmp_streamer.dart';
 
-import 'drawer.dart';
+import 'settings/drawer.dart';
 
 void main() {
   runApp(const MyApp());
@@ -211,7 +211,43 @@ class NotificationListener extends StatelessWidget {
 
 
 
+class MyErrorWidget extends StatelessWidget {
+  final String error;
 
+  const MyErrorWidget({Key? key, required this.error}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Center(
+        child: Text(error)
+    );
+  }
+}
+
+class Loader extends StatelessWidget {
+
+  final double radius;
+  final Brightness brightness;
+
+  const Loader({Key? key, this.radius = mediumRadius, this.brightness = Brightness.light}) : super(key: key);
+
+  static const double smallRadius = 10.0;
+  static const double mediumRadius = 14.0;
+
+  @override
+  Widget build(BuildContext context) {
+    if (brightness == Brightness.light) {
+      return Center(child: CupertinoActivityIndicator(radius: radius,),);
+    }
+
+    return Center(
+      child: Theme(data: ThemeData(cupertinoOverrideTheme: const CupertinoThemeData(brightness: Brightness.dark)),
+          child: CupertinoActivityIndicator(radius: radius,)),
+    );
+
+  }
+}
 
 
 

@@ -1,6 +1,6 @@
-import 'package:example_basic/settings_rows.dart';
-import 'package:example_basic/utils.dart';
-import 'package:example_basic/widgets.dart';
+import 'package:example_basic/settings/settings_rows.dart';
+import 'package:example_basic/settings/utils.dart';
+import 'package:example_basic/settings/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rtmp_streamer/flutter_rtmp_streamer.dart';
 import 'package:unicons/unicons.dart';
