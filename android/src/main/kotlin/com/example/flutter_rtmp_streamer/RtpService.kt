@@ -372,11 +372,20 @@ class RtpService : Service() {
 
         streamingSettings?.let {
 
+
+
+
+
+          if (newValue.cameraFacing != streamingSettings!!.cameraFacing){
+            camera2Base?.switchCamera()
+            streamingSettings!!.cameraFacing = camera2Base!!.cameraFacing
+          }
+
+
           if (!camera2Base!!.isStreaming ) {
 
             if (newValue.serviceInBackground!=it.serviceInBackground)
               it.serviceInBackground = newValue.serviceInBackground
-
 
             if (newValue.videoBitrate!=it.videoBitrate)
               it.videoBitrate = newValue.videoBitrate
@@ -393,14 +402,23 @@ class RtpService : Service() {
             if (newValue.audioChannelCount!=it.audioChannelCount)
               it.audioChannelCount = newValue.audioChannelCount
 
+
+            if (
+              (newValue.resolutionBack!=it.resolutionBack && newValue.cameraFacing == CameraHelper.Facing.BACK)||
+              (newValue.resolutionFront!=it.resolutionFront && newValue.cameraFacing == CameraHelper.Facing.FRONT)
+            ){
+              it.resolutionBack = newValue.resolutionBack
+              it.resolutionFront = newValue.resolutionFront
+              if (camera2Base!!.isOnPreview) {
+                stopPreview()
+                startPreview()
+              }
+
+            }
+
           }
 
 
-
-          if (newValue.cameraFacing != streamingSettings!!.cameraFacing){
-            camera2Base?.switchCamera()
-            streamingSettings!!.cameraFacing = camera2Base!!.cameraFacing
-          }
         }
 
 

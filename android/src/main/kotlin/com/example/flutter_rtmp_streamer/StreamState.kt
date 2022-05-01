@@ -47,8 +47,8 @@ class StreamState(
 @Serializable
 class StreamingSettings(
   var serviceInBackground: Boolean,
-  val resolutionFront: Resolution,
-  val resolutionBack: Resolution,
+  var resolutionFront: Resolution,
+  var resolutionBack: Resolution,
   var videoFps: Int,
   var videoBitrate: Int,
   val h264profile: String,
