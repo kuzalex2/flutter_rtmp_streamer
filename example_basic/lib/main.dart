@@ -1,4 +1,3 @@
-import 'package:example_basic/settings/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rtmp_streamer/flutter_rtmp_streamer.dart';
@@ -248,7 +247,3 @@ class Loader extends StatelessWidget {
 
   }
 }
-
-
-
-
