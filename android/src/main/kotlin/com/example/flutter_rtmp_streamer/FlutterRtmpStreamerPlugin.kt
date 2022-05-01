@@ -184,7 +184,7 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
           ))
 
         } catch (e: Exception) {
-          result.error("getResolutionsBack", e.toString(), null)
+          result.error("getResolutions", e.toString(), null)
           return;
         }
 

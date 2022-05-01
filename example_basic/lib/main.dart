@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
           future: FlutterRtmpStreamer.init(StreamingSettings.initial),
           builder: (context, snapshot) {
             if (snapshot.hasError){
-              return ErrorWidget( error: snapshot.error.toString() );
+              return MyErrorWidget( error: snapshot.error.toString() );
             }
             if (!snapshot.hasData) {
               return const Loader();
@@ -51,10 +51,10 @@ class MainScreen extends StatelessWidget {
 
           Container(color: Colors.black,),
 
-          Center(
-              child: FlutterRtmpCameraPreview(controller: streamer),
-
-          ),
+          // Center(
+          //     child: FlutterRtmpCameraPreview(controller: streamer),
+          //
+          // ),
 
           NotificationListener(streamer: streamer),
 
@@ -209,10 +209,10 @@ class NotificationListener extends StatelessWidget {
 
 
 
-class ErrorWidget extends StatelessWidget {
+class MyErrorWidget extends StatelessWidget {
   final String error;
 
-  const ErrorWidget({Key? key, required this.error}) : super(key: key);
+  const MyErrorWidget({Key? key, required this.error}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

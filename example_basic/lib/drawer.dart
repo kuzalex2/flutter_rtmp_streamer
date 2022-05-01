@@ -52,9 +52,6 @@ class _CameraSettingsDrawerState extends State<CameraSettingsDrawer> {
                 disabled: streamingState.isStreaming || streamingState.inSettings,
                 value: streamingState.streamingSettings.serviceInBackground,
                 onChanged: (bool value) => widget.streamer.changeBgMode( value ),
-                // setState(() {
-                //   streamingSettings = streamingSettings.copyWith(serviceInBackground: value);
-                // }),
               ),
 
               const SettingsLine(text: "VIDEO"),
@@ -79,6 +76,8 @@ class _CameraSettingsDrawerState extends State<CameraSettingsDrawer> {
               //   onTap: () {},
               //   disabled: streamingState.isStreaming,
               // ),
+
+              VideoResolutionOption(streamer: widget.streamer,),
 
               VideoBitrateOption(streamer: widget.streamer,),
 
@@ -152,6 +151,9 @@ class Tuple<A,B> {
 
 class NamedValue<V> extends Tuple<V, String> {
   const NamedValue(V value, String name) : super(value, name);
+
+  @override
+  String toString() => name;
 }
 
 abstract class StreamStateStatelessWidget extends StatelessWidget {
@@ -176,7 +178,7 @@ abstract class StreamStateStatelessWidget extends StatelessWidget {
   }
 }
 
-class ListDrawer<T extends NamedValue> extends StreamStateStatelessWidget {
+class ListDrawer<T> extends StreamStateStatelessWidget {
 
   const ListDrawer({
     Key? key,
@@ -214,7 +216,7 @@ class ListDrawer<T extends NamedValue> extends StreamStateStatelessWidget {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB (16,8,0,8),
-                      child: Text(item.name),
+                      child: Text(item.toString()),
                     )
                 ),
               )
@@ -224,17 +226,103 @@ class ListDrawer<T extends NamedValue> extends StreamStateStatelessWidget {
    );
   }
 
-
 }
 
 
+class FutureListDrawer<T> extends StatelessWidget {
+  const FutureListDrawer({
+    Key? key,
+    required this.streamer,
+    required this.title,
+    this.selectedItem,
+    this.onSelected,
+    required this.futureList,
+  }) : super(key: key);
+
+  final FlutterRtmpStreamer streamer;
+  final String title;
+  final Future<List<T>> futureList;
+  final T? selectedItem;
+  final Function(T)? onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<T>>(
+      future: futureList,
+      builder: (context, snapshot) {
+
+        if (snapshot.hasError){
+          return Drawer(
+              child: Scaffold(
+                  appBar: AppBar(title: Text(title),),
+                  body: MyErrorWidget( error: snapshot.error.toString() )
+              ));
+        }
+
+        if (!snapshot.hasData){
+          return Drawer(
+              child: Scaffold(
+                  appBar: AppBar(title: Text(title),),
+                  body: const Loader()
+              ));
+        }
+
+        return ListDrawer<T>(
+          streamer: streamer,
+          title: title,
+          list: snapshot.data!,
+          selectedItem: selectedItem,
+          onSelected: onSelected,
+        );
+      }
+    );
+  }
+}
+
+
+
+
+class VideoResolutionOption extends StreamStateStatelessWidget {
+
+  const VideoResolutionOption({Key? key, required FlutterRtmpStreamer streamer}) : super(key: key, streamer: streamer);
+
+
+  @override
+  Widget builder(BuildContext context, StreamingState state) {
+
+    return SettingsOption(
+      text: "Resolution",
+      rightText: "${state.streamingSettings.resolution}",
+      onTap: () =>
+          Navigator.of(context).push(
+              MaterialPageRoute(
+                  builder: (BuildContext context) => FutureListDrawer<Resolution>(
+                    streamer: streamer,
+                    title: "Bitrate:",
+                    futureList: () async {
+                      final result = await streamer.getResolutions();
+                      // await Future.delayed(Duration(seconds: 1));
+                      // throw "some error";
+                      return result.front;
+                    }(),
+                    selectedItem: state.streamResolution,
+                    // onSelected: (item) =>
+                    //     streamer.changeVideoBitrate(item.value ),
+                  )
+              )
+          ),
+      disabled: state.inSettings || state.isStreaming,
+    );
+  }
+
+}
 
 class VideoBitrateOption extends StreamStateStatelessWidget {
 
   const VideoBitrateOption({Key? key, required FlutterRtmpStreamer streamer}) : super(key: key, streamer: streamer);
 
   static const List<NamedValue<int>> bitrates = [
-    NamedValue(-1, "Auto"),
+    // NamedValue(-1, "Auto"),
     NamedValue(1 * 1024  * 1024,"1 Mbit/s"), // 360p
     NamedValue(2 * 1024 * 1024, "2 Mbit/s"), // 480p
     NamedValue(5 * 1024 * 1024, "5 Mbit/s"), // 720p

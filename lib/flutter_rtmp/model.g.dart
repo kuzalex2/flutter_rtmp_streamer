@@ -78,3 +78,21 @@ const _$StreamingCameraFacingEnumMap = {
   StreamingCameraFacing.front: 'FRONT',
   StreamingCameraFacing.back: 'BACK',
 };
+
+BackAndFrontResolutions _$BackAndFrontResolutionsFromJson(
+        Map<String, dynamic> json) =>
+    BackAndFrontResolutions(
+      back: (json['back'] as List<dynamic>)
+          .map((e) => Resolution.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      front: (json['front'] as List<dynamic>)
+          .map((e) => Resolution.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+
+Map<String, dynamic> _$BackAndFrontResolutionsToJson(
+        BackAndFrontResolutions instance) =>
+    <String, dynamic>{
+      'back': instance.back,
+      'front': instance.front,
+    };

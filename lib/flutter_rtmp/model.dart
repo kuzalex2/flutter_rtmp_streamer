@@ -220,49 +220,78 @@ class StreamingSettings extends Equatable {
 }
 
 
+
+///
+///
+@JsonSerializable()
 class BackAndFrontResolutions extends Equatable {
+  final List<Resolution> back;
+  final List<Resolution> front;
 
-  final List<Resolution> _back;
-  final List<Resolution> _front;
+  const BackAndFrontResolutions({
+    required this.back,
+    required this.front,
 
-  UnmodifiableListView<Resolution> get back =>
-      UnmodifiableListView<Resolution>(_back);
+  });
 
-  UnmodifiableListView<Resolution> get front =>
-      UnmodifiableListView<Resolution>(_front);
 
-  const BackAndFrontResolutions._({required List<Resolution> back, required List<Resolution> front}):
-        _back = back,
-        _front = front
-  ;
+  factory BackAndFrontResolutions.fromJson(Map<String, dynamic> json) => _$BackAndFrontResolutionsFromJson(json);
+  Map<String, dynamic> toJson() => _$BackAndFrontResolutionsToJson(this);
 
-  static const empty = BackAndFrontResolutions._(back:[], front: [],);
-  bool get isEmpty => this == empty;
-  bool get isNotEmpty => !isEmpty;
 
-  factory BackAndFrontResolutions.fromJson(Map<String, dynamic> json) =>
-      BackAndFrontResolutions._(
-        back: (json['back'] as List<dynamic>).map((e) =>
-            Resolution(
-              ((e as Map<String, dynamic>)["width"]) as int,
-              ((e)["height"]) as int,
-            )
-        ).toList(),
 
-        front: (json['front'] as List<dynamic>).map((e) =>
-            Resolution(
-              ((e as Map<String, dynamic>)["width"]) as int,
-              ((e)["height"]) as int,
-            )
-        ).toList(),
-      );
 
   @override
   List<Object> get props => [
-    _back,
-    _front,
+    back,
+    front,
+
   ];
+
 }
+// class BackAndFrontResolutions extends Equatable {
+//
+//   final List<Resolution> _back;
+//   final List<Resolution> _front;
+//
+//   UnmodifiableListView<Resolution> get back =>
+//       UnmodifiableListView<Resolution>(_back);
+//
+//   UnmodifiableListView<Resolution> get front =>
+//       UnmodifiableListView<Resolution>(_front);
+//
+//   const BackAndFrontResolutions._({required List<Resolution> back, required List<Resolution> front}):
+//         _back = back,
+//         _front = front
+//   ;
+//
+//   static const empty = BackAndFrontResolutions._(back:[], front: [],);
+//   bool get isEmpty => this == empty;
+//   bool get isNotEmpty => !isEmpty;
+//
+//   factory BackAndFrontResolutions.fromJson(Map<String, dynamic> json) =>
+//       BackAndFrontResolutions._(
+//         back: (json['back'] as List<dynamic>).map((e) =>
+//             Resolution(
+//               ((e as Map<String, dynamic>)["width"]) as int,
+//               ((e)["height"]) as int,
+//             )
+//         ).toList(),
+//
+//         front: (json['front'] as List<dynamic>).map((e) =>
+//             Resolution(
+//               ((e as Map<String, dynamic>)["width"]) as int,
+//               ((e)["height"]) as int,
+//             )
+//         ).toList(),
+//       );
+//
+//   @override
+//   List<Object> get props => [
+//     _back,
+//     _front,
+//   ];
+// }
 
 
 class StreamingNotification extends Equatable {
