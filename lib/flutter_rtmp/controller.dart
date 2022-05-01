@@ -204,7 +204,32 @@ class FlutterRtmpStreamer {
       await Future.delayed(const Duration(milliseconds: 400));
       await _channel.invokeMethod('changeVideoBitrate', {'value': bitrate});
     } catch (e) {
-      debugPrint("stopStream failed: $e");
+      debugPrint("changeVideoBitrate failed: $e");
+      rethrow;
+    } finally {
+      _changeState(_state.copyWith(inSettings: false));
+    }
+  }
+
+  changeBgMode(bool value) async {
+
+    if (!_initialized) {
+      throw 'FlutterRtmpStreamer not initialized!';
+    }
+
+    if (state.inSettings) {
+      return;
+    }
+
+    _changeState(
+        _state.copyWith(inSettings: true)
+    );
+
+    try {
+      await Future.delayed(const Duration(milliseconds: 400));
+      await _channel.invokeMethod('changeBgMode', {'value': value});
+    } catch (e) {
+      debugPrint("changeBgMode failed: $e");
       rethrow;
     } finally {
       _changeState(_state.copyWith(inSettings: false));

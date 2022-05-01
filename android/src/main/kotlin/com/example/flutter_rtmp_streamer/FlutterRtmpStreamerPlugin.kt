@@ -37,7 +37,7 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
   private lateinit var applicationContext : Context
 
 //  private var fgService: Boolean = false
-  private var fgService: Boolean = true
+//  private var fgService: Boolean = true
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_rtmp_streamer")
@@ -95,32 +95,42 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
        *
        */
       "startStream" -> {
-        try {
 
-          val uri:String = call.argument("uri")!!
-          val streamName:String = call.argument("streamName")!!
-          val endpoint = "$uri/$streamName"
 
-          if (fgService){
-            if (! isMyServiceRunning(RtpService::class.java)) {
+        RtpService.getStreamingSettings()?.let {
 
-              val intent = Intent(applicationContext, RtpService::class.java)
-              intent.putExtra("endpoint", endpoint)
-              applicationContext.startService(intent)
+          try {
+
+            val uri: String = call.argument("uri")!!
+            val streamName: String = call.argument("streamName")!!
+            val endpoint = "$uri/$streamName"
+
+
+
+            if (it.serviceInBackground) {
+              if (!isMyServiceRunning(RtpService::class.java)) {
+
+                val intent = Intent(applicationContext, RtpService::class.java)
+                intent.putExtra("endpoint", endpoint)
+                applicationContext.startService(intent)
+              }
+
+            } else {
+              RtpService.startInForeground(applicationContext, endpoint)
+
             }
 
-          } else {
-            RtpService.startInForeground(applicationContext, endpoint)
-
+          } catch (e: Exception) {
+            result.error("startStream", e.toString(), null)
+            return;
           }
 
-        } catch (e: Exception) {
-          result.error("startStream", e.toString(), null)
-          return;
+          result.success(true)
+          return
+        } ?: run {
+          result.error("startStream", "not initialized", null)
         }
 
-        result.success( true )
-        return
       }
 
       /**
@@ -128,27 +138,37 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
        *
        */
       "stopStream" -> {
-        try {
 
-          if (fgService){
+        RtpService.getStreamingSettings()?.let {
 
-            if (isMyServiceRunning(RtpService::class.java)) {
-              applicationContext.stopService(Intent(applicationContext, RtpService::class.java))
+          try {
+
+            if (it.serviceInBackground){
+
+              if (isMyServiceRunning(RtpService::class.java)) {
+                applicationContext.stopService(Intent(applicationContext, RtpService::class.java))
+              }
+
+            } else {
+              RtpService.stopStream();
             }
 
-          } else {
-            RtpService.stopStream();
+
+
+          } catch (e: Exception) {
+            result.error("stopStream", e.toString(), null)
+            return;
           }
 
+          result.success( true )
+          return
 
 
-        } catch (e: Exception) {
-          result.error("stopStream", e.toString(), null)
-          return;
+
+        } ?: run {
+          result.error("stopStream", "not initialized", null)
         }
 
-        result.success( true )
-        return
       }
 
       /**
@@ -191,6 +211,26 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
         return
       }
 
+      /**
+       *
+       *
+       */
+      "changeBgMode" -> {
+        try {
+          val value: Boolean = call.argument("value")!!
+
+          RtpService.changeBgMode(value)
+
+          RtpService.sendCameraStatusToDart()
+        } catch (e: Exception) {
+          result.error("changeVideoBitrate", e.toString(), null)
+          return;
+        }
+
+        result.success( true )
+        return
+      }
+
       else -> result.notImplemented()
 
     }
@@ -199,9 +239,11 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
     channel.setMethodCallHandler(null)
 
-    if (!fgService){
 
-      RtpService.stopStream();
+    RtpService.getStreamingSettings()?.let {
+      if (it.serviceInBackground){
+        RtpService.stopStream();
+      }
     }
   }
 

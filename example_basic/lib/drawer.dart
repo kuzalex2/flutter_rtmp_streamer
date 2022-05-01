@@ -46,15 +46,16 @@ class _CameraSettingsDrawerState extends State<CameraSettingsDrawer> {
 
             return ListView(children:  [
 
-              // SettingsSwitch(
-              //   iconData: UniconsLine.wifi_router,
-              //   title: "Background streaming",
-              //   disabled: streamingState.isStreaming,
-              //   value: streamingSettings.serviceInBackground,
-              //   onChanged: (bool value) => setState(() {
-              //     streamingSettings = streamingSettings.copyWith(serviceInBackground: value);
-              //   }),
-              // ),
+              SettingsSwitch(
+                iconData: UniconsLine.wifi_router,
+                title: "Background streaming",
+                disabled: streamingState.isStreaming || streamingState.inSettings,
+                value: streamingState.streamingSettings.serviceInBackground,
+                onChanged: (bool value) => widget.streamer.changeBgMode( value ),
+                // setState(() {
+                //   streamingSettings = streamingSettings.copyWith(serviceInBackground: value);
+                // }),
+              ),
 
               const SettingsLine(text: "VIDEO"),
 

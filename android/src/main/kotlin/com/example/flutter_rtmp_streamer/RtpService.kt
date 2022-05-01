@@ -112,6 +112,12 @@ class RtpService : Service() {
         streamingSettings = value
     }
 
+    fun getStreamingSettings(): StreamingSettings? {
+      return streamingSettings;
+    }
+
+
+
     fun setView(openGlView: OpenGlView) {
       this.openGlView = openGlView
       camera2Base?.replaceView(openGlView)
@@ -324,6 +330,14 @@ class RtpService : Service() {
         streamingSettings!!.videoBitrate = value;
       }
     }
+
+    fun changeBgMode(value: Boolean){
+      if (!camera2Base!!.isStreaming && streamingSettings!=null) {
+        streamingSettings!!.serviceInBackground = value;
+      }
+    }
+
+
   }
 
 
