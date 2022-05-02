@@ -20,6 +20,11 @@ class Resolution(val width: Int, val height: Int){
     get() = Math.max(width, height)
   val min: Int
     get() = Math.min(width, height)
+
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other !is Resolution) return false
+    return width == other.width && height == other.height
+  }
 }
 
 @Keep
@@ -61,5 +66,14 @@ class StreamingSettings(
   override fun toString(): String {
     return ""
   }
+
+  val resolution: Resolution // property type is optional since it can be inferred from the getter's return type
+    get() = when(cameraFacing) {
+      CameraHelper.Facing.FRONT -> resolutionFront;
+      CameraHelper.Facing.BACK -> resolutionBack;
+    }
+
+
+
 }
 
