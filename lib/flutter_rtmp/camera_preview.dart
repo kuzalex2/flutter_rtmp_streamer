@@ -35,9 +35,13 @@ class _FlutterRtmpCameraPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+
+
+
     if (Platform.isAndroid) {
       return AspectRatio(
-        aspectRatio: state.streamResolution.width == 0 ? 1.0 : state.streamResolution.height / state.streamResolution.width,
+        aspectRatio: state.resolution.width == 0 ? 1.0 : state.resolution.height / state.resolution.width,
         child: AndroidView(
           key: key,
 

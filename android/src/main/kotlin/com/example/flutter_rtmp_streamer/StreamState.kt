@@ -39,6 +39,7 @@ class StreamState(
   val isAudioMuted: Boolean,
   val isRtmpConnected: Boolean,
   val streamResolution: Resolution,
+  val resolution: Resolution,
   val cameraOrientation: Int,
   val streamingSettings: StreamingSettings,
   ){

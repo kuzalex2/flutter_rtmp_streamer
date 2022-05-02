@@ -25,6 +25,8 @@ StreamingState _$StreamingStateFromJson(Map<String, dynamic> json) =>
       isRtmpConnected: json['isRtmpConnected'] as bool,
       streamResolution:
           Resolution.fromJson(json['streamResolution'] as Map<String, dynamic>),
+      resolution:
+          Resolution.fromJson(json['resolution'] as Map<String, dynamic>),
       cameraOrientation: json['cameraOrientation'] as int,
       streamingSettings: StreamingSettings.fromJson(
           json['streamingSettings'] as Map<String, dynamic>),
@@ -37,6 +39,7 @@ Map<String, dynamic> _$StreamingStateToJson(StreamingState instance) =>
       'isAudioMuted': instance.isAudioMuted,
       'isRtmpConnected': instance.isRtmpConnected,
       'streamResolution': instance.streamResolution,
+      'resolution': instance.resolution,
       'cameraOrientation': instance.cameraOrientation,
       'streamingSettings': instance.streamingSettings,
     };

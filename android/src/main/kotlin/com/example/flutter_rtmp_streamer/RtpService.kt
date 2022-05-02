@@ -260,12 +260,18 @@ class RtpService : Service() {
     {
       val reply: MutableMap<String, String> = HashMap()
 
+
+
       reply["streamState"] = Json.encodeToString(StreamState.serializer(), StreamState(
         isStreaming = camera2Base!!.isStreaming,
         isOnPreview = camera2Base!!.isOnPreview,
         isAudioMuted = camera2Base!!.isAudioMuted,
         isRtmpConnected = isRtmpConnected,
-        streamResolution = Resolution(width = camera2Base!!.streamWidth, height = camera2Base!!.streamHeight),
+        resolution = streamingSettings.resolution,
+        streamResolution = if (camera2Base!!.isStreaming)
+          Resolution(width = camera2Base!!.streamWidth, height = camera2Base!!.streamHeight)
+        else
+          Resolution(0,0),
         cameraOrientation = CameraHelper.getCameraOrientation(contextApp),
         streamingSettings = streamingSettings,
       ));

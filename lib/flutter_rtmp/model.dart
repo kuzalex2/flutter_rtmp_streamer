@@ -47,6 +47,7 @@ class StreamingState extends Equatable {
   final bool isRtmpConnected;
 
   final Resolution streamResolution;
+  final Resolution resolution;
   final int cameraOrientation;
 
   final StreamingSettings streamingSettings;
@@ -60,6 +61,7 @@ class StreamingState extends Equatable {
     required this.isAudioMuted,
     required this.isRtmpConnected,
     required this.streamResolution,
+    required this.resolution,
     required this.cameraOrientation,
     required this.streamingSettings,
     this.inSettings = false,
@@ -71,6 +73,7 @@ class StreamingState extends Equatable {
       isAudioMuted: false,
       isRtmpConnected: false,
       streamResolution: Resolution(0,0),
+      resolution: Resolution(0,0),
       cameraOrientation: 0,
       inSettings: false,
       streamingSettings: StreamingSettings.initial,
@@ -93,6 +96,7 @@ class StreamingState extends Equatable {
       isRtmpConnected: isRtmpConnected,
       cameraOrientation: cameraOrientation,
       streamResolution: streamResolution,
+      resolution: resolution,
       streamingSettings: streamingSettings,
       inSettings: inSettings ?? this.inSettings,
     );
@@ -106,6 +110,7 @@ class StreamingState extends Equatable {
     isRtmpConnected,
 
     streamResolution,
+    resolution,
     cameraOrientation,
     inSettings,
 
@@ -145,7 +150,8 @@ class StreamingSettings extends Equatable {
     // cameraFacing : StreamingCameraFacing.back,
     cameraFacing : StreamingCameraFacing.front,
     // resolutionFront: Resolution(640, 480),
-    resolutionFront: Resolution(1920, 1080),
+    // resolutionFront: Resolution(1920, 1080),
+    resolutionFront: Resolution(1072, 1072),
     resolutionBack: Resolution(640, 480),
     videoFps:30,
     videoBitrate: 1024 * 1024,
