@@ -26,6 +26,7 @@ Privacy Permission
 Android
 See the required device permissions from the AndroidManifest.xml file.
 
+```xml
 <manifest>
   ...
     <application...
@@ -49,12 +50,15 @@ See the required device permissions from the AndroidManifest.xml file.
 
   ...
 </manifest>
+```
+
 iOS & macOS
 Open the Info.plist and add:
 
+```
 Privacy - Microphone Usage Description，and add some description into the Value column.
 Privacy - Camera Usage Description, and add some description into the Value column.
-
+```
 
 ### Example
 
