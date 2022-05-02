@@ -42,8 +42,9 @@ internal class CameraView(private val context: Context, private val id: Int, cre
 
   override fun surfaceDestroyed(holder: SurfaceHolder) {
     Log.e(TAG, "surfaceDestroyed $holder $id")
-    RtpService.setView(context)
     RtpService.stopPreview()
+
+    RtpService.setView(context)
   }
 
   init {
