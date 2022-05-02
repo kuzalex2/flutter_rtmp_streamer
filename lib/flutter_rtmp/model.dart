@@ -142,8 +142,10 @@ class StreamingSettings extends Equatable {
   static const initial = StreamingSettings(
     // serviceInBackground: true,
     serviceInBackground: false,
-    cameraFacing : StreamingCameraFacing.back,
-    resolutionFront: Resolution(640, 480),
+    // cameraFacing : StreamingCameraFacing.back,
+    cameraFacing : StreamingCameraFacing.front,
+    // resolutionFront: Resolution(640, 480),
+    resolutionFront: Resolution(1920, 1080),
     resolutionBack: Resolution(640, 480),
     videoFps:30,
     videoBitrate: 1024 * 1024,

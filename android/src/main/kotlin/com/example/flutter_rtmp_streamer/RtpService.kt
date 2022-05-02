@@ -132,16 +132,7 @@ class RtpService : Service() {
     fun startPreview() {
       streamingSettings?.let {
 
-        when(it.cameraFacing) {
-          CameraHelper.Facing.BACK ->
-            camera2Base?.startPreview(it.cameraFacing, it.resolutionBack.width, it.resolutionBack.height)
-
-          CameraHelper.Facing.FRONT ->
-            camera2Base?.startPreview(it.cameraFacing, it.resolutionFront.width, it.resolutionFront.height);
-
-        }
-
-
+        camera2Base?.startPreview(it.cameraFacing, it.resolution.width, it.resolution.height)
       }
       sendCameraStatusToDart()
 
@@ -196,8 +187,8 @@ class RtpService : Service() {
 
     private fun prepareVideo(it: StreamingSettings): Boolean{
       return camera2Base!!.prepareVideo(
-        it.resolutionBack.width,
-        it.resolutionBack.height,
+        it.resolution.width,
+        it.resolution.height,
         it.videoFps,
         it.videoBitrate,
         CameraHelper.getCameraOrientation(contextApp)
@@ -413,41 +404,10 @@ class RtpService : Service() {
                 stopPreview()
                 startPreview()
               }
-
             }
-
           }
-
-
         }
-
-
-
-//
-        //  val resolutionFront: Resolution,
-        //  val resolutionBack: Resolution,
-
-
-
-
       }
     }
-
-
-//    fun changeVideoBitrate(value: Int){
-//      if (!camera2Base!!.isStreaming && streamingSettings!=null) {
-//        streamingSettings!!.videoBitrate = value;
-//      }
-//    }
-
-
-
-
   }
-
-
-
-
-
-
 }
