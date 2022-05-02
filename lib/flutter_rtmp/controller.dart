@@ -8,7 +8,20 @@ import 'package:wakelock/wakelock.dart';
 
 import 'model.dart';
 
-class FlutterRtmpStreamer {
+mixin WakeLock {
+
+  bool _wakeLockEnabled = false;
+
+  toggle(bool enable){
+    if (enable != _wakeLockEnabled){
+      Wakelock.toggle(enable: enable);
+      _wakeLockEnabled = enable ;
+    }
+  }
+
+}
+
+class FlutterRtmpStreamer with WakeLock  {
   static const MethodChannel _channel = MethodChannel('flutter_rtmp_streamer');
 
   /// native -> flutter channel
@@ -45,18 +58,12 @@ class FlutterRtmpStreamer {
       _nofiticationController.stream;
 
   bool _initialized = false;
-  bool _wakeLockEnabled = false;
+
 
   _changeState(StreamingState newState) {
     _state = newState;
 
-
-    bool neewWakeLock = _state.isStreaming || _state.isOnPreview;
-
-    if (neewWakeLock != _wakeLockEnabled){
-      Wakelock.toggle(enable: neewWakeLock);
-      _wakeLockEnabled = neewWakeLock ;
-    }
+    toggle(_state.isStreaming || _state.isOnPreview);
 
     if (!_stateController.isClosed) {
       _stateController.add(_state);
@@ -68,6 +75,8 @@ class FlutterRtmpStreamer {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
+
+
 
 
     _events.listen((event) {
@@ -104,6 +113,9 @@ class FlutterRtmpStreamer {
       }
     });
   }
+
+
+
 
   stopStream() async {
     if (!_initialized) {
@@ -201,4 +213,8 @@ class FlutterRtmpStreamer {
     final String? version = await _channel.invokeMethod('getPlatformVersion');
     return version;
   }
+
+
+
+
 }

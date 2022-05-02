@@ -36,8 +36,6 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
   private lateinit var channel : MethodChannel
   private lateinit var applicationContext : Context
 
-//  private var fgService: Boolean = false
-//  private var fgService: Boolean = true
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_rtmp_streamer")
@@ -49,7 +47,6 @@ class FlutterRtmpStreamerPlugin: FlutterPlugin, MethodCallHandler {
       DartMessenger(flutterPluginBinding.binaryMessenger, "flutter_rtmp_streamer/events")
     )
 
-//    RtpService.sendCameraStatusToDart();
 
     flutterPluginBinding
       .platformViewRegistry

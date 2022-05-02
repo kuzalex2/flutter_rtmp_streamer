@@ -375,26 +375,29 @@ class RtpService : Service() {
     ///
     ///
     private val connectCheckerRtp = object : ConnectCheckerRtp {
-      override fun onConnectionStartedRtp(rtpUrl: String) {
-        showNotification("Stream connection started")
+      override fun onConnectionStartedRtp(rtpUrl: String) {}
+      override fun onNewBitrateRtp(bitrate: Long) {}
+      override fun onAuthErrorRtp() {
+        showNotification("Stream auth error")
       }
+      override fun onAuthSuccessRtp() {
+        showNotification("Stream auth success")
+      }
+
+
 
       override fun onConnectionSuccessRtp() {
         isRtmpConnected = true
         showNotification("Stream started")
-        Log.e(TAG, "RTP service destroy")
         sendCameraStatusToDart()
-      }
-
-      override fun onNewBitrateRtp(bitrate: Long) {
-
       }
 
       override fun onConnectionFailedRtp(reason: String) {
         isRtmpConnected = false
         showNotification("Stream connection failed")
-        Log.e(TAG, "RTP service destroy")
         sendCameraStatusToDart()
+
+        stopStream()
 
       }
 
@@ -402,16 +405,9 @@ class RtpService : Service() {
         isRtmpConnected = false
         showNotification("Stream stopped")
         sendCameraStatusToDart()
-
       }
 
-      override fun onAuthErrorRtp() {
-        showNotification("Stream auth error")
-      }
 
-      override fun onAuthSuccessRtp() {
-        showNotification("Stream auth success")
-      }
     }
 
   }

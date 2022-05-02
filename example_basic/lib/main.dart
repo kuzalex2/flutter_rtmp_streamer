@@ -145,39 +145,37 @@ class RightControlBox extends StatelessWidget {
   Widget build(BuildContext context) {
 
 
-    return ElevatedButton(
-        onPressed: () {
-          try {
+    return StreamBuilder<StreamingState>(
+        stream: streamer.stateStream,
+        initialData: streamer.state,
+        builder: (context, streamingState) {
+        return ElevatedButton(
+            style: streamingState.data?.isStreaming??false ? ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Colors.red)):null,
+            onPressed: () {
+              try {
 
-            if ( streamer.state.isStreaming ) {
-              streamer.stopStream();
-            } else {
-              Future.delayed(const Duration(seconds: 2)).then((value) =>
-                streamer.startStream(
-                    uri: "rtmp://flutter-webrtc.kuzalex.com/live",
-                    streamName: "one"
-                )
-              );
-            }
+                if ( streamer.state.isStreaming ) {
+                  streamer.stopStream();
+                } else {
+                  Future.delayed(const Duration(seconds: 2)).then((value) =>
+                    streamer.startStream(
+                        uri: "rtmp://flutter-webrtc.kuzalex.com/live",
+                        streamName: "one"
+                    )
+                  );
+                }
 
-          } catch (e) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('Error: $e'),
-            ));
-          }
-        },
-        child: StreamBuilder<StreamingState>(
-            stream: streamer.stateStream,
-            initialData: streamer.state,
-            builder: (context, streamingState) {
-              if (!streamingState.hasData){
-                return const Loader();
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text('Error: $e'),
+                ));
               }
-              return Text(
-                  streamingState.data!.isStreaming ? "Stop streaming" : "Start streaming"
-              );
-            }
-        )
+            },
+            child: Text(
+                streamingState.data!.isStreaming ? "Stop streaming" : "Start streaming"
+            )
+        );
+      }
     );
 
   }

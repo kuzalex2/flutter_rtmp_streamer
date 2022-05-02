@@ -136,6 +136,8 @@ class StreamingSettings extends Equatable {
   final int audioSampleRate;
   final int audioChannelCount;
 
+  bool get serviceInForeground => !serviceInBackground;
+
 
 
   static const initial = StreamingSettings(
