@@ -53,8 +53,7 @@ class StreamState(
 @Serializable
 class StreamingSettings(
   var serviceInBackground: Boolean,
-  var resolutionFront: Resolution,
-  var resolutionBack: Resolution,
+  var resolution: Resolution,
   var videoFps: Int,
   var videoBitrate: Int,
   val h264profile: String,
@@ -67,14 +66,6 @@ class StreamingSettings(
   override fun toString(): String {
     return ""
   }
-
-  val resolution: Resolution // property type is optional since it can be inferred from the getter's return type
-    get() = when(cameraFacing) {
-      CameraHelper.Facing.FRONT -> resolutionFront;
-      CameraHelper.Facing.BACK -> resolutionBack;
-    }
-
-
 
 }
 

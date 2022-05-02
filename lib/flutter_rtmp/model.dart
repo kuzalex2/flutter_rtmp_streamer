@@ -126,8 +126,7 @@ class StreamingSettings extends Equatable {
   final bool serviceInBackground;
   final StreamingCameraFacing cameraFacing;
 
-  final Resolution resolutionFront;
-  final Resolution resolutionBack;
+  final Resolution resolution;
   final int videoFps;
   final int videoBitrate;
   final String h264profile;
@@ -137,22 +136,21 @@ class StreamingSettings extends Equatable {
   final int audioSampleRate;
   final int audioChannelCount;
 
-  Resolution get resolution {
-    switch (cameraFacing) {
-      case StreamingCameraFacing.back: return resolutionBack;
-      case StreamingCameraFacing.front: return resolutionFront;
-    }
-  }
+
 
   static const initial = StreamingSettings(
     // serviceInBackground: true,
     serviceInBackground: false,
+
     // cameraFacing : StreamingCameraFacing.back,
     cameraFacing : StreamingCameraFacing.front,
-    // resolutionFront: Resolution(640, 480),
-    // resolutionFront: Resolution(1920, 1080),
-    resolutionFront: Resolution(1072, 1072),
-    resolutionBack: Resolution(640, 480),
+
+
+    // resolution: Resolution(640, 480),
+    // resolution: Resolution(1920, 1080),
+    resolution: Resolution(1072, 1072),
+
+
     videoFps:30,
     videoBitrate: 1024 * 1024,
     h264profile: "main",
@@ -165,8 +163,7 @@ class StreamingSettings extends Equatable {
   const StreamingSettings({
     required this.serviceInBackground,
     required this.cameraFacing,
-    required this.resolutionFront,
-    required this.resolutionBack,
+    required this.resolution,
     required this.videoFps,
     required this.videoBitrate,
     required this.h264profile,
@@ -184,8 +181,7 @@ class StreamingSettings extends Equatable {
   StreamingSettings copyWith({
     bool? serviceInBackground,
     StreamingCameraFacing? cameraFacing,
-    Resolution? resolutionFront,
-    Resolution? resolutionBack,
+    Resolution? resolution,
     int? videoFps,
     int? videoBitrate,
     String? h264profile,
@@ -197,8 +193,7 @@ class StreamingSettings extends Equatable {
     return StreamingSettings(
       serviceInBackground: serviceInBackground ?? this.serviceInBackground,
       cameraFacing: cameraFacing ?? this.cameraFacing,
-      resolutionFront: resolutionFront ?? this.resolutionFront,
-      resolutionBack: resolutionBack ?? this.resolutionBack,
+      resolution: resolution ?? this.resolution,
       videoFps: videoFps ?? this.videoFps,
       videoBitrate: videoBitrate ?? this.videoBitrate,
       h264profile: h264profile ?? this.h264profile,
@@ -214,8 +209,7 @@ class StreamingSettings extends Equatable {
   List<Object> get props => [
     serviceInBackground,
     cameraFacing,
-    resolutionFront,
-    resolutionBack,
+    resolution,
     videoFps,
     videoBitrate,
     h264profile,
@@ -240,21 +234,16 @@ class BackAndFrontResolutions extends Equatable {
   const BackAndFrontResolutions({
     required this.back,
     required this.front,
-
   });
 
 
   factory BackAndFrontResolutions.fromJson(Map<String, dynamic> json) => _$BackAndFrontResolutionsFromJson(json);
   Map<String, dynamic> toJson() => _$BackAndFrontResolutionsToJson(this);
 
-
-
-
   @override
   List<Object> get props => [
     back,
     front,
-
   ];
 
 }

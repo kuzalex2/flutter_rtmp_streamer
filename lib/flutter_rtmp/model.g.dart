@@ -49,10 +49,8 @@ StreamingSettings _$StreamingSettingsFromJson(Map<String, dynamic> json) =>
       serviceInBackground: json['serviceInBackground'] as bool,
       cameraFacing:
           $enumDecode(_$StreamingCameraFacingEnumMap, json['cameraFacing']),
-      resolutionFront:
-          Resolution.fromJson(json['resolutionFront'] as Map<String, dynamic>),
-      resolutionBack:
-          Resolution.fromJson(json['resolutionBack'] as Map<String, dynamic>),
+      resolution:
+          Resolution.fromJson(json['resolution'] as Map<String, dynamic>),
       videoFps: json['videoFps'] as int,
       videoBitrate: json['videoBitrate'] as int,
       h264profile: json['h264profile'] as String,
@@ -66,8 +64,7 @@ Map<String, dynamic> _$StreamingSettingsToJson(StreamingSettings instance) =>
     <String, dynamic>{
       'serviceInBackground': instance.serviceInBackground,
       'cameraFacing': _$StreamingCameraFacingEnumMap[instance.cameraFacing],
-      'resolutionFront': instance.resolutionFront,
-      'resolutionBack': instance.resolutionBack,
+      'resolution': instance.resolution,
       'videoFps': instance.videoFps,
       'videoBitrate': instance.videoBitrate,
       'h264profile': instance.h264profile,

@@ -141,20 +141,10 @@ class VideoResolutionsOption extends OptionsWidget {
                         return result.front;
                       }(),
                       selectedItem: streamer.state.streamingSettings.resolution,
-                      onSelected: (item) {
-                        switch (streamer.state.streamingSettings.cameraFacing) {
-                          case StreamingCameraFacing.back:
-                            streamer.changeStreamingSettings(
-                                streamer.state.streamingSettings.copyWith(resolutionBack: item)
-                            );
-                            break;
-                          case StreamingCameraFacing.front:
-                            streamer.changeStreamingSettings(
-                                streamer.state.streamingSettings.copyWith(resolutionFront: item)
-                            );
-                            break;
-                        }
-                      }
+                      onSelected: (item) =>
+                        streamer.changeStreamingSettings(
+                            streamer.state.streamingSettings.copyWith(resolution: item)
+                        ),
                   )
               )
           ),

@@ -400,12 +400,8 @@ class RtpService : Service() {
               it.audioChannelCount = newValue.audioChannelCount
 
 
-            if (
-              (newValue.resolutionBack!=it.resolutionBack && newValue.cameraFacing == CameraHelper.Facing.BACK)||
-              (newValue.resolutionFront!=it.resolutionFront && newValue.cameraFacing == CameraHelper.Facing.FRONT)
-            ){
-              it.resolutionBack = newValue.resolutionBack
-              it.resolutionFront = newValue.resolutionFront
+            if (newValue.resolution!=it.resolution ){
+              it.resolution = newValue.resolution
               if (camera2Base!!.isOnPreview) {
                 stopPreview()
                 startPreview()
