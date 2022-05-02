@@ -3,6 +3,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:wakelock/wakelock.dart';
+
 
 import 'model.dart';
 
@@ -43,25 +45,31 @@ class FlutterRtmpStreamer {
       _nofiticationController.stream;
 
   bool _initialized = false;
-
-  // setSettings(StreamingSettings settings) async {
-  //   await Future.delayed(const Duration(seconds: 2));
-  //   _state = _state.copyWith(streamingSettings: settings);
-  //   if (!_stateController.isClosed) {
-  //     _stateController.add(_state);
-  //   }
-  //
-  //
-  // }
+  bool _wakeLockEnabled = false;
 
   _changeState(StreamingState newState) {
     _state = newState;
+
+
+    bool neewWakeLock = _state.isStreaming || _state.isOnPreview;
+
+    if (neewWakeLock != _wakeLockEnabled){
+      Wakelock.toggle(enable: neewWakeLock);
+      _wakeLockEnabled = neewWakeLock ;
+    }
+
     if (!_stateController.isClosed) {
       _stateController.add(_state);
     }
   }
 
   FlutterRtmpStreamer._() : _state = StreamingState.empty {
+
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+
+
     _events.listen((event) {
       debugPrint('$event');
 

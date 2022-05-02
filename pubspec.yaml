@@ -13,6 +13,7 @@ dependencies:
   equatable: ^2.0.0
   permission_handler: ^8.3.0
   json_annotation: ^4.5.0
+  wakelock: ^0.6.1+2
 
 dev_dependencies:
   flutter_test:
