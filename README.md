@@ -16,24 +16,45 @@ for Android and [HaishinKit.swift](https://github.com/shogo4405/HaishinKit.swift
 * Automatic reconnecting.
 * Background streaming on Android.
 
+## Usage
+To use this plugin, please add flutter_rtmp_streamer as a dependency to your pubspec.yaml file.
+
 ## Installation
 
-...
+Privacy Permission
 
-### iOS
+Android
+See the required device permissions from the AndroidManifest.xml file.
 
-Add two rows to the `ios/Runner/Info.plist`:
+<manifest>
+  ...
+    <application...
 
-```xml
-<key>NSCameraUsageDescription</key>
-<string>Can I use the camera please?</string>
-<key>NSMicrophoneUsageDescription</key>
-<string>Can I use the mic please?</string>
-```
+        <service android:name="com.example.flutter_rtmp_streamer.RtpService" />
+    </application>
 
-### Android
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
-...
+    <!--needed by background Rtp service to keep service alive-->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
+  ...
+</manifest>
+iOS & macOS
+Open the Info.plist and add:
+
+Privacy - Microphone Usage Description，and add some description into the Value column.
+Privacy - Camera Usage Description, and add some description into the Value column.
+
 
 ### Example
 
