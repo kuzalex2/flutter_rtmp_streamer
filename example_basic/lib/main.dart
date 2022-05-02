@@ -157,11 +157,11 @@ class RightControlBox extends StatelessWidget {
                 if ( streamer.state.isStreaming ) {
                   streamer.stopStream();
                 } else {
-                  Future.delayed(const Duration(seconds: 2)).then((value) =>
+                  // Future.delayed(const Duration(seconds: 2)).then((value) =>
                     streamer.startStream(
                         uri: "rtmp://flutter-webrtc.kuzalex.com/live",
                         streamName: "one"
-                    )
+                    // )
                   );
                 }
 

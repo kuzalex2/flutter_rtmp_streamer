@@ -23,7 +23,9 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
@@ -107,10 +109,11 @@ class RtpService : Service() {
     private var dartMessenger:DartMessenger? = null
     private var streamingSettings: StreamingSettings? = null;
 
-//    fun setStreamingSettings(value: StreamingSettings) {
-//      if (streamingSettings == null)
-//        streamingSettings = value
-//    }
+
+    private val NRETRY = 5
+    private val RETRY_DELAY_START:Long = 3000
+    private var retry_count = 0;
+
 
     fun getStreamingSettings(): StreamingSettings? {
       return streamingSettings;
@@ -146,6 +149,9 @@ class RtpService : Service() {
       if (camera2Base == null) {
         camera2Base = RtmpCamera2(context, true, connectCheckerRtp)
         isRtmpConnected = false
+        camera2Base!!.setReTries(NRETRY)
+        retry_count = 0
+
       }
     }
 
@@ -153,6 +159,7 @@ class RtpService : Service() {
       if (camera2Base != null) {
         if (camera2Base!!.isStreaming) camera2Base!!.stopStream()
         isRtmpConnected = false
+        retry_count = 0
         sendCameraStatusToDart()
       }
     }
@@ -182,6 +189,9 @@ class RtpService : Service() {
             RtspCamera2(openGlView, connectCheckerRtp)
           }
         }
+        camera2Base!!.setReTries(NRETRY)
+        isRtmpConnected = false
+        retry_count = 0
       }
     }
 
@@ -388,16 +398,39 @@ class RtpService : Service() {
 
       override fun onConnectionSuccessRtp() {
         isRtmpConnected = true
+        Handler(Looper.getMainLooper()).postDelayed({
+          if (isRtmpConnected) {
+            retry_count = 0
+          }
+        },5000)
         showNotification("Stream started")
         sendCameraStatusToDart()
       }
 
       override fun onConnectionFailedRtp(reason: String) {
-        isRtmpConnected = false
-        showNotification("Stream connection failed")
-        sendCameraStatusToDart()
 
-        stopStream()
+
+
+        Handler(Looper.getMainLooper()).post {
+
+
+          retry_count++
+          if (retry_count>7)
+            retry_count = 7;
+          var delay:Long = RETRY_DELAY_START * retry_count
+
+
+          if (camera2Base!!.reTry(delay, reason)) {
+            isRtmpConnected = false
+            showNotification(reason)
+            sendCameraStatusToDart()
+          } else {
+            isRtmpConnected = false
+            stopStream()
+            showNotification("Stream connection failed")
+
+          }
+        }
 
       }
 

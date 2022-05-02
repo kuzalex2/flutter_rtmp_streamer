@@ -205,14 +205,12 @@ class RightControlBox extends StatelessWidget {
             if ( streamer.state.isStreaming ) {
               streamer.stopStream();
             } else {
-              Future.delayed(const Duration(seconds: 2)).then((value) =>
-                  streamer.startStream(
-                      ///
-                      /// Put real rtmp address here... 
-                      /// 
-                      uri: "rtmp://xyz.com/live",
-                      streamName: "one"
-                  )
+              streamer.startStream(
+                ///
+                /// Put real rtmp address here... 
+                /// 
+                  uri: "rtmp://xyz.com/live",
+                  streamName: "one"
               );
             }
 

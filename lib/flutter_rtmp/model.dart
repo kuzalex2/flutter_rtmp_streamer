@@ -149,8 +149,8 @@ class StreamingSettings extends Equatable {
 
 
     // resolution: Resolution(640, 480),
-    // resolution: Resolution(1920, 1080),
-    resolution: Resolution(1072, 1072),
+    resolution: Resolution(1280, 720),
+    // resolution: Resolution(1072, 1072),
 
 
     videoFps:30,
