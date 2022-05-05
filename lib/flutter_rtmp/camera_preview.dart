@@ -35,22 +35,28 @@ class _FlutterRtmpCameraPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return AspectRatio(
+        aspectRatio: state.resolution.width == 0 ? 1.0 : state.resolution
+            .height / state.resolution.width,
+        child: const FlutterRtmpCameraView()
+    );
+  }
+}
 
+class FlutterRtmpCameraView extends StatelessWidget {
+  const FlutterRtmpCameraView({Key? key}) : super(key: key);
 
-
-
+  @override
+  Widget build(BuildContext context) {
     if (Platform.isAndroid) {
-      return AspectRatio(
-        aspectRatio: state.resolution.width == 0 ? 1.0 : state.resolution.height / state.resolution.width,
-        child: AndroidView(
-          key: key,
+      return AndroidView(
+        key: key,
 
-          viewType: 'flutter_rtmp_streamer_camera_view',
-          onPlatformViewCreated: (id) {
-            debugPrint("_onPlatformViewCreated $id");
-          },
-          creationParamsCodec: const StandardMessageCodec(),
-        ),
+        viewType: 'flutter_rtmp_streamer_camera_view',
+        onPlatformViewCreated: (id) {
+          debugPrint("_onPlatformViewCreated $id");
+        },
+        creationParamsCodec: const StandardMessageCodec(),
       );
     }
 
