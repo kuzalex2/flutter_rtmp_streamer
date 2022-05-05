@@ -270,8 +270,6 @@ class RtpService : Service() {
     {
       val reply: MutableMap<String, String> = HashMap()
 
-
-
       reply["streamState"] = Json.encodeToString(StreamState.serializer(), StreamState(
         isStreaming = camera2Base!!.isStreaming,
         isOnPreview = camera2Base!!.isOnPreview,
@@ -299,13 +297,15 @@ class RtpService : Service() {
 
     }
 
-    private fun sendNotificationToDart(description: String) {
+    private fun sendErrorToDart(description: String) {
       dartMessenger?.send(
         "Notification",
         mapOf("description" to description)
       )
     }
 
+    /// shows text in as platform Notification from background process
+    ///
     private fun showNotification(text: String) {
       streamingSettings?.let {
         if (it.serviceInBackground) {
@@ -318,8 +318,11 @@ class RtpService : Service() {
           }
         }
       }
+    }
 
-      this.sendNotificationToDart(text);
+    private fun showError(text: String) {
+      showNotification(text);
+      sendErrorToDart(text);
     }
 
 
@@ -388,7 +391,7 @@ class RtpService : Service() {
       override fun onConnectionStartedRtp(rtpUrl: String) {}
       override fun onNewBitrateRtp(bitrate: Long) {}
       override fun onAuthErrorRtp() {
-        showNotification("Stream auth error")
+        showError("Stream auth error")
       }
       override fun onAuthSuccessRtp() {
         showNotification("Stream auth success")
@@ -422,12 +425,12 @@ class RtpService : Service() {
 
           if (camera2Base!!.reTry(delay, reason)) {
             isRtmpConnected = false
-            showNotification(reason)
+            showError(reason)
             sendCameraStatusToDart()
           } else {
             isRtmpConnected = false
             stopStream()
-            showNotification("Stream connection failed")
+            showError("Stream connection failed")
 
           }
         }
