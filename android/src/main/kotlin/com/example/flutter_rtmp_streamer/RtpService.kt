@@ -208,12 +208,19 @@ class RtpService : Service() {
     private fun prepareAudio(it: StreamingSettings): Boolean{
       assert(it.audioChannelCount == -1 || it.audioChannelCount == 1 || it.audioChannelCount == 2);
 
-      return camera2Base!!.prepareAudio(
+      val prepared = camera2Base!!.prepareAudio(
         if (it.audioBitrate == -1) 65536 else it.audioBitrate,
         if (it.audioSampleRate == -1) 32000 else it.audioSampleRate,
         it.audioChannelCount != 1,
         false, false
       );
+
+      if (prepared){
+        if (it.muteAudio)
+          camera2Base!!.disableAudio()
+      }
+
+      return prepared;
     }
 
 

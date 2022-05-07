@@ -136,6 +136,8 @@ class StreamingSettings extends Equatable {
   final int audioSampleRate;
   final int audioChannelCount;
 
+  final bool muteAudio;
+
   bool get serviceInForeground => !serviceInBackground;
 
 
@@ -160,6 +162,7 @@ class StreamingSettings extends Equatable {
     audioBitrate: -1,
     audioSampleRate: -1,
     audioChannelCount: 2,
+    muteAudio: false,
   );
 
   const StreamingSettings({
@@ -173,6 +176,7 @@ class StreamingSettings extends Equatable {
     required this.audioBitrate,
     required this.audioSampleRate,
     required this.audioChannelCount,
+    required this.muteAudio,
   });
 
 
@@ -191,6 +195,7 @@ class StreamingSettings extends Equatable {
     int? audioBitrate,
     int? audioSampleRate,
     int? audioChannelCount,
+    bool? muteAudio,
   }) {
     return StreamingSettings(
       serviceInBackground: serviceInBackground ?? this.serviceInBackground,
@@ -203,6 +208,7 @@ class StreamingSettings extends Equatable {
       audioBitrate: audioBitrate ?? this.audioBitrate,
       audioSampleRate: audioSampleRate ?? this.audioSampleRate,
       audioChannelCount: audioChannelCount ?? this.audioChannelCount,
+      muteAudio: muteAudio ?? this.muteAudio,
 
     );
   }
@@ -219,6 +225,7 @@ class StreamingSettings extends Equatable {
     audioBitrate,
     audioSampleRate,
     audioChannelCount,
+    muteAudio,
 
   ];
 

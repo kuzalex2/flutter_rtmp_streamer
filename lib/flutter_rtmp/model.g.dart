@@ -58,6 +58,7 @@ StreamingSettings _$StreamingSettingsFromJson(Map<String, dynamic> json) =>
       audioBitrate: json['audioBitrate'] as int,
       audioSampleRate: json['audioSampleRate'] as int,
       audioChannelCount: json['audioChannelCount'] as int,
+      muteAudio: json['muteAudio'] as bool,
     );
 
 Map<String, dynamic> _$StreamingSettingsToJson(StreamingSettings instance) =>
@@ -72,6 +73,7 @@ Map<String, dynamic> _$StreamingSettingsToJson(StreamingSettings instance) =>
       'audioBitrate': instance.audioBitrate,
       'audioSampleRate': instance.audioSampleRate,
       'audioChannelCount': instance.audioChannelCount,
+      'muteAudio': instance.muteAudio,
     };
 
 const _$StreamingCameraFacingEnumMap = {

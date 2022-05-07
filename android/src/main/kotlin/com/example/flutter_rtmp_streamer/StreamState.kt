@@ -62,6 +62,7 @@ class StreamingSettings(
   var audioSampleRate: Int,
   var audioChannelCount: Int,
   var cameraFacing: CameraHelper.Facing,
+  var muteAudio: Boolean,
 ){
   override fun toString(): String {
     return ""
