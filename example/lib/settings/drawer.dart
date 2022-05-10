@@ -229,7 +229,7 @@ class CameraFacingOption extends OptionsWidget {
                   builder: (BuildContext context) => ListDrawer<NamedValue<StreamingCameraFacing>>(
                     streamer: streamer,
                     checkIsStreaming: false,
-                    title: "Bitrate:",
+                    title: "Camera Facing:",
                     list: list,
                     selectedItem: selected,
                     onSelected: (item) =>
