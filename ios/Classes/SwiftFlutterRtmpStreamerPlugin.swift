@@ -29,7 +29,7 @@ class CameraViewFactory: NSObject, FlutterPlatformViewFactory {
 public class SwiftFlutterRtmpStreamerPlugin: NSObject, FlutterPlugin {
     
  
-    private var _rtpService:RtpService?
+    private var _rtpService:RtpService
     
     
     init(rtpService: RtpService) {
@@ -53,52 +53,46 @@ public class SwiftFlutterRtmpStreamerPlugin: NSObject, FlutterPlugin {
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
       
-      guard let args0 = call.arguments else {
-          result(FlutterError.init(code: call.method, message: "args is empty", details: nil))
-          return
-      }
       
-      guard let args = args0 as? [String: Any] else {
-          result(FlutterError.init(code: call.method, message: "args is empty", details: nil))
-          return
-      }
       
       
       switch call.method {
+       /*
+        *
+        *
+        */
         case "getPlatformVersion":
           result("iOS " + UIDevice.current.systemVersion)
           break;
           
+        /*
+         *
+         *
+         */
         case "init":
+          
+          guard let args0 = call.arguments else {
+              result(FlutterError.init(code: call.method, message: "args is empty", details: nil))
+              return
+          }
+          
+          guard let args = args0 as? [String: Any] else {
+              result(FlutterError.init(code: call.method, message: "args is empty", details: nil))
+              return
+          }
+          
           if let streamingSettings = args["streamingSettings"] as? String {
-              
-              let decoder = JSONDecoder()
-//              let encoder = JSONEncoder()
-              
+                            
               do {
                   
                 
-                  _rtpService?.setStreamingSettings( streamingSettings: try decoder.decode(StreamingSettings.self, from: streamingSettings.data(using: .utf8)!))
+                  _rtpService.setStreamingSettings( streamingSettings: try JSONDecoder().decode(StreamingSettings.self, from: streamingSettings.data(using: .utf8)!))
                 
                   result(true)
-                  _rtpService?.sendCameraStatusToDart()
+                  
+                  _rtpService.sendCameraStatusToDart()
                   
 
-                     
-                  
-//                  var cameraValue = try getCameraValue()
-//
-//                  let resolutionsBack = getSupportedResolutions();
-//
-//                  let supportedResolutions = SupportedResolutions(back: resolutionsBack,front: resolutionsBack)
-//                  let supportedResolutionsData = try encoder.encode(supportedResolutions)
-//
-//                  cameraValue["supportedResolutions"] = String(decoding: supportedResolutionsData, as: UTF8.self)
-//
-//                  result(cameraValue);
-//
-//                  outputChannelsSendUpdateStatus()
-                  
               } catch {
                   result(FlutterError.init(code: "init", message: "\(error)", details: nil))
 
@@ -110,20 +104,23 @@ public class SwiftFlutterRtmpStreamerPlugin: NSObject, FlutterPlugin {
 
           break;
           
-//                "init" -> {
-//                  try {
-//                    val streamingSettingsString: String = call.argument("streamingSettings")!!
-//
-//                    RtpService.setStreamingSettings( Json.decodeFromString(StreamingSettings.serializer(), streamingSettingsString) )
-//                    RtpService.sendCameraStatusToDart()
-//                  } catch (e: Exception) {
-//                    result.error("init", e.toString(), null)
-//                    return;
-//                  }
-//
-//                  result.success( true )
-//                  return
-//                }
+          
+          /*
+           *
+           *
+           */
+          case "getResolutions":
+          
+              let resolutions = BackAndFrontResolutions(back: _rtpService.getSupportedResolutions(), front: _rtpService.getSupportedResolutions())
+              
+              do {
+                  result(String(decoding: try JSONEncoder().encode(resolutions), as: UTF8.self))
+              } catch {
+                  result(FlutterError.init(code: "getResolutions", message: "\(error)", details: nil))
+              }
+          break;
+          
+
       
         default:
           result(FlutterMethodNotImplemented);

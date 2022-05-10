@@ -31,7 +31,7 @@ class DartMessenger : NSObject, FlutterStreamHandler {
         return nil
     }
 
-    func _send(eventType: String, args: [String:Any]) {
+    func send(eventType: String, args: [String:Any]) {
         guard let eventSink = _eventSink else {
             return
         }

@@ -15,8 +15,6 @@ import Logboard
 
 
 
-
-
 class CameraView: NSObject, FlutterPlatformView {
     
     func view() -> UIView {

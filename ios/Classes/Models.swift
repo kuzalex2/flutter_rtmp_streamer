@@ -97,11 +97,12 @@ struct StreamingState: Codable {
     var cameraOrientation: Int;
     var streamingSettings: StreamingSettings;
 }
+
 //
-//struct SupportedResolutions:Codable {
-//    let back: [Resolution];
-//    let front:[Resolution];
-//}
+struct BackAndFrontResolutions:Codable {
+    let back: [Resolution];
+    let front:[Resolution];
+}
 
 
 extension String: Error {}

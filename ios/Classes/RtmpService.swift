@@ -27,9 +27,34 @@ class RtpService: NSObject {
     
     private func sendErrorToDart(description: String) {
     
-        _dartMessenger?._send(eventType: "Notification", args: ["description":description])
+        _dartMessenger?.send(eventType: "Notification", args: ["description":description])
     }
 
+    
+    func getSupportedResolutions() -> [Resolution]
+    {
+        var result: [Resolution] = [];
+        
+        let session:AVCaptureSession = AVCaptureSession();
+        let presets: [AVCaptureSession.Preset] = [
+            AVCaptureSession.Preset.hd4K3840x2160,
+            AVCaptureSession.Preset.hd1920x1080,
+            AVCaptureSession.Preset.hd1280x720,
+            AVCaptureSession.Preset.iFrame960x540,
+            AVCaptureSession.Preset.vga640x480,
+            AVCaptureSession.Preset.cif352x288
+        ];
+        
+        for preset in presets {
+            if session.canSetSessionPreset(preset){
+                result.append(Resolution.fromPreset(preset: preset))
+            }
+            
+        }
+        
+        
+        return result;
+    }
     
     init(dartMessenger: DartMessenger) {
         logger.info("init")
@@ -142,7 +167,7 @@ class RtpService: NSObject {
         }
         
         do {
-            _dartMessenger?._send(eventType: "StreamingState", args: try getStreamingState( streamingSettings: p ))
+            _dartMessenger?.send(eventType: "StreamingState", args: try getStreamingState( streamingSettings: p ))
         } catch {
             
         }
