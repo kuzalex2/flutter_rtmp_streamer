@@ -228,7 +228,7 @@ class RtpService: NSObject {
             .sessionPreset: preset,
             .continuousAutofocus: true,
             .continuousExposure: true,
-             .preferredVideoStabilizationMode: stabilizationMode
+            .preferredVideoStabilizationMode: stabilizationMode
         ]
         
         
@@ -290,6 +290,7 @@ class RtpService: NSObject {
         
         
 //        _rtmpStream.close()
+//        _rtmpConnection.close()
         
     }
     
