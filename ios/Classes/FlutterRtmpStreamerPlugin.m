@@ -12,4 +12,8 @@
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
   [SwiftFlutterRtmpStreamerPlugin registerWithRegistrar:registrar];
 }
+
+//- (void)detachFromEngineForRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar{
+//    NSLog(@"detachFromEngineForRegistrar");
+//}
 @end

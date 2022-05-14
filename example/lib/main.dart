@@ -37,26 +37,37 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MainScreen extends StatelessWidget {
+
+class MainScreen extends StatefulWidget {
   final FlutterRtmpStreamer streamer;
   const MainScreen({Key? key, required this.streamer}) : super(key: key);
 
   @override
+  _MainScreenState createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  bool showPreview = true;
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: CameraSettingsDrawer(streamer: streamer),
+      drawer: CameraSettingsDrawer(streamer: widget.streamer),
       appBar: const _AppBar(),
       body: Stack(
         children: [
 
           Container(color: Colors.black,),
 
-          Center(
-              child: FlutterRtmpCameraPreview(controller: streamer),
+          if (showPreview)
+            Center(
+              child: FlutterRtmpCameraPreview(controller: widget.streamer),
 
-          ),
+            ),
 
-          NotificationListener(streamer: streamer),
+
+
+          NotificationListener(streamer: widget.streamer),
 
           Center(
             child: Container(
@@ -65,13 +76,28 @@ class MainScreen extends StatelessWidget {
                   borderRadius: BorderRadius.all(Radius.circular(20))
               ),
               width: MediaQuery.of(context).size.width,
-              child: Row(children: [
-                const Spacer(),
-                LeftControlBox(streamer: streamer),
-                const Spacer(),
-                RightControlBox(streamer: streamer),
-                const Spacer(),
-              ]),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+
+                  Row(children: [
+                    const Spacer(),
+                    LeftControlBox(streamer: widget.streamer),
+                    const Spacer(),
+                    RightControlBox(streamer: widget.streamer),
+                    const Spacer(),
+                  ]),
+                  ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          showPreview = !showPreview;
+                        });
+
+                      },
+                      child: const Text("Stop/Start Preview Test")
+                  ),
+                ],
+              ),
             ),
           ),
 
@@ -81,6 +107,52 @@ class MainScreen extends StatelessWidget {
     );
   }
 }
+
+
+// class MainScreen extends StatelessWidget {
+//   final FlutterRtmpStreamer streamer;
+//   const MainScreen({Key? key, required this.streamer}) : super(key: key);
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       drawer: CameraSettingsDrawer(streamer: streamer),
+//       appBar: const _AppBar(),
+//       body: Stack(
+//         children: [
+//
+//           Container(color: Colors.black,),
+//
+//           Center(
+//               child: FlutterRtmpCameraPreview(controller: streamer),
+//
+//           ),
+//
+//           NotificationListener(streamer: streamer),
+//
+//           Center(
+//             child: Container(
+//               decoration: const BoxDecoration(
+//                   color: Colors.white30,
+//                   borderRadius: BorderRadius.all(Radius.circular(20))
+//               ),
+//               width: MediaQuery.of(context).size.width,
+//               child: Row(children: [
+//                 const Spacer(),
+//                 LeftControlBox(streamer: streamer),
+//                 const Spacer(),
+//                 RightControlBox(streamer: streamer),
+//                 const Spacer(),
+//               ]),
+//             ),
+//           ),
+//
+//
+//         ],
+//       ),
+//     );
+//   }
+// }
 
 class _AppBar extends StatelessWidget with PreferredSizeWidget {
   const _AppBar({

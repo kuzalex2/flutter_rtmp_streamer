@@ -60,9 +60,20 @@ class FlutterRtmpCameraView extends StatelessWidget {
       );
     }
 
-    // if (Platform.isIOS) {
-    //
-    // }
+    else
+
+    if (Platform.isIOS) {
+      return UiKitView(
+        key: key,
+
+        viewType: 'flutter_rtmp_streamer_camera_view',
+        onPlatformViewCreated: (id) {
+          debugPrint("_onPlatformViewCreated $id");
+        },
+        creationParamsCodec: const StandardMessageCodec(),
+      );
+    }
+
 
     return Center(child: Text("FlutterRtmpCamera doesn't support ${Platform.operatingSystem} yet."),);
   }

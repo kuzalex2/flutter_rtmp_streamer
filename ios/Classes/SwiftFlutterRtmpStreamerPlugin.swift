@@ -3,10 +3,10 @@ import UIKit
 
 
 class CameraViewFactory: NSObject, FlutterPlatformViewFactory {
-    private var _registrar: FlutterPluginRegistrar
+    private var _rtpService:RtpService
 
-    init(registrar: FlutterPluginRegistrar) {
-        self._registrar = registrar
+    init(registrar: FlutterPluginRegistrar, rtpService: RtpService) {
+        self._rtpService = rtpService
         super.init()
     }
 
@@ -19,7 +19,7 @@ class CameraViewFactory: NSObject, FlutterPlatformViewFactory {
             frame: frame,
             viewIdentifier: viewId,
             arguments: args,
-            registrar: _registrar
+            rtpService: _rtpService
            )
     }
 }
@@ -42,12 +42,20 @@ public class SwiftFlutterRtmpStreamerPlugin: NSObject, FlutterPlugin {
       
     public static func register(with registrar: FlutterPluginRegistrar) {
 
+        
+
         let channel = FlutterMethodChannel(name: "flutter_rtmp_streamer", binaryMessenger: registrar.messenger())
 
           
         let instance = SwiftFlutterRtmpStreamerPlugin(rtpService: RtpService(dartMessenger: DartMessenger(messenger: registrar.messenger(), name: "flutter_rtmp_streamer/events")))
         registrar.addMethodCallDelegate(instance, channel: channel)
+        
+        let nativeViewFactory = CameraViewFactory( registrar: registrar, rtpService: instance._rtpService)
+        registrar.register(nativeViewFactory, withId: "flutter_rtmp_streamer_camera_view")
     }
+    
+  
+    
 
     
     
