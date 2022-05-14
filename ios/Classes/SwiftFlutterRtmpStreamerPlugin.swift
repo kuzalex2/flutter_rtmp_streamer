@@ -94,7 +94,7 @@ public class SwiftFlutterRtmpStreamerPlugin: NSObject, FlutterPlugin {
               do {
                   
                 
-                  _rtpService.setStreamingSettings( streamingSettings: try JSONDecoder().decode(StreamingSettings.self, from: streamingSettings.data(using: .utf8)!))
+                  _rtpService.setStreamingSettings( newValue: try JSONDecoder().decode(StreamingSettings.self, from: streamingSettings.data(using: .utf8)!))
                 
                   result(true)
                   
@@ -127,6 +127,48 @@ public class SwiftFlutterRtmpStreamerPlugin: NSObject, FlutterPlugin {
                   result(FlutterError.init(code: "getResolutions", message: "\(error)", details: nil))
               }
           break;
+          
+          
+          
+          /*
+           *
+           *
+           */
+          case "changeStreamingSettings":
+            
+            guard let args0 = call.arguments else {
+                result(FlutterError.init(code: call.method, message: "args is empty", details: nil))
+                return
+            }
+            
+            guard let args = args0 as? [String: Any] else {
+                result(FlutterError.init(code: call.method, message: "args is empty", details: nil))
+                return
+            }
+            
+            if let streamingSettings = args["streamingSettings"] as? String {
+                              
+                do {
+                    
+                  
+                    _rtpService.setStreamingSettings( newValue: try JSONDecoder().decode(StreamingSettings.self, from: streamingSettings.data(using: .utf8)!))
+                  
+                    result(true)
+                    
+                    _rtpService.sendCameraStatusToDart()
+                    
+
+                } catch {
+                    result(FlutterError.init(code: "changeStreamingSettings", message: "\(error)", details: nil))
+
+                    
+                }
+            } else {
+                result(FlutterError.init(code: "changeStreamingSettings", message: "initialParams empty", details: nil))
+            }
+
+            break;
+         
           
 
       

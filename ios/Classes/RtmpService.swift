@@ -24,6 +24,7 @@ class RtpService: NSObject {
 
     private var _rtmpConnection: RTMPConnection = RTMPConnection()
     private var _rtmpStream: RTMPStream!
+    private var _lfView: MTHKView?
     
     private func sendErrorToDart(description: String) {
     
@@ -63,7 +64,7 @@ class RtpService: NSObject {
         super.init()
     }
     
-    func setStreamingSettings(streamingSettings: StreamingSettings) {
+    func setStreamingSettings(newValue: StreamingSettings) {
         if (_streamingState == nil){
             _streamingState = StreamingState(
                 isStreaming: false,
@@ -73,10 +74,72 @@ class RtpService: NSObject {
                 streamResolution: Resolution(width: 1, height: 1),
                 resolution: Resolution(width: 1, height: 1),
                 cameraOrientation: 1,
-                streamingSettings: streamingSettings
+                streamingSettings: newValue
             )
             
             _rtmpStream = RTMPStream(connection: _rtmpConnection)
+        } else {
+           
+            if (newValue.cameraFacing != _streamingState!.streamingSettings.cameraFacing){
+               switchCamera()
+             }
+            
+            if (!_streamingState!.isStreaming){
+                
+                
+                if (newValue.resolution != _streamingState!.streamingSettings.resolution ){
+                    _streamingState!.streamingSettings.resolution = newValue.resolution;
+                  if _streamingState!.isOnPreview {
+                      let view:MTHKView = _lfView!
+                      stopPreview();
+                      startPreview(lfView: view)
+                  }
+                }
+                                       
+//
+//
+//
+//                if (_streamingState!.isOnPreview){
+//                    let view:MTHKView = _lfView!
+//                    stopPreview();
+//                    startPreview(lfView: view)
+//                }
+//
+            }
+            
+
+//
+//
+//                     if (!camera2Base!!.isStreaming ) {
+//
+//                       if (newValue.serviceInBackground!=it.serviceInBackground)
+//                         it.serviceInBackground = newValue.serviceInBackground
+//
+//                       if (newValue.videoBitrate!=it.videoBitrate)
+//                         it.videoBitrate = newValue.videoBitrate
+//
+//                       if (newValue.videoFps!=it.videoFps)
+//                         it.videoFps = newValue.videoFps
+//
+//                       if (newValue.audioBitrate!=it.audioBitrate)
+//                         it.audioBitrate = newValue.audioBitrate
+//
+//                       if (newValue.audioSampleRate!=it.audioSampleRate)
+//                         it.audioSampleRate = newValue.audioSampleRate
+//
+//                       if (newValue.audioChannelCount!=it.audioChannelCount)
+//                         it.audioChannelCount = newValue.audioChannelCount
+//
+//
+//                       if (newValue.resolution!=it.resolution ){
+//                         it.resolution = newValue.resolution
+//                         if (camera2Base!!.isOnPreview) {
+//                           stopPreview()
+//                           startPreview()
+//                         }
+//                       }
+//                     }
+            
         }
     }
     
@@ -98,6 +161,31 @@ class RtpService: NSObject {
         } catch {
             debugPrint("sendCameraStatusToDart failed \(error)")
         }
+    }
+    
+    func switchCamera() {
+        
+        if _streamingState != nil {
+            
+            if _streamingState!.isOnPreview || _streamingState!.isStreaming {
+               
+                let newCameraFacing = _streamingState!.streamingSettings.cameraFacing == "FRONT" ? "BACK" : "FRONT"
+
+                let prevVideoIsMirrored = _rtmpStream!.captureSettings[.isVideoMirrored]
+                
+
+                _rtmpStream!.captureSettings[.isVideoMirrored] = newCameraFacing == "FRONT"
+
+                _rtmpStream!.attachCamera(DeviceUtil.device(withPosition: newCameraFacing == "FRONT" ? .front : .back)) { error in
+
+                    self._rtmpStream!.captureSettings[.isVideoMirrored] = prevVideoIsMirrored
+                    return
+                }
+                
+                _streamingState!.streamingSettings.cameraFacing = newCameraFacing
+            }
+        }
+        
     }
     
     
@@ -178,7 +266,9 @@ class RtpService: NSObject {
         
         _rtmpStream!.videoSettings = [
             .scalingMode: ScalingMode.letterbox,
-            .profileLevel: profileLevel
+            .profileLevel: profileLevel,
+            .width: streamingSettings.resolution.width,
+            .height: streamingSettings.resolution.height,
         ]
 //        _rtmpStream.videoSettings = [
 //            .width: 720,
@@ -205,7 +295,8 @@ class RtpService: NSObject {
             self.sendErrorToDart(description: "\(error)")
         }
        
-        lfView.attachStream(_rtmpStream)
+        _lfView = lfView
+        _lfView!.attachStream(_rtmpStream)
         
         
         _streamingState!.isOnPreview = true;
@@ -226,7 +317,8 @@ class RtpService: NSObject {
             return;
         }
         
-        _streamingState!.isOnPreview = false;
+        _streamingState!.isOnPreview = false
+        _lfView = nil
         
     }
     

@@ -66,13 +66,26 @@ struct Resolution: Codable {
         return AVCaptureSession.Preset.vga640x480;
         
     }
+    
+    
+//    static func ==(lhs: Resolution, rhs: Resolution) -> Bool {
+//        return lhs.width == rhs.width && lhs.height == rhs.height
+//    }
+    
+}
+
+func ==(lhs: Resolution, rhs: Resolution) -> Bool {
+    return lhs.width == rhs.width && lhs.height == rhs.height
+}
+func !=(lhs: Resolution, rhs: Resolution) -> Bool {
+    return !(lhs == rhs)
 }
 
 
 
 struct StreamingSettings:Codable {
     let serviceInBackground: Bool;
-    let resolution: Resolution;
+    var resolution: Resolution;
     let videoFps: Int;
     let videoBitrate: Int;
     let h264profile:String;
@@ -80,7 +93,7 @@ struct StreamingSettings:Codable {
     let audioBitrate:Int;
     let audioSampleRate:Int;
     let audioChannelCount:Int;
-    let cameraFacing: String;
+    var cameraFacing: String;
     let muteAudio: Bool;
 }
 
