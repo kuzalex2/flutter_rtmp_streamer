@@ -88,7 +88,11 @@ class CameraSettingsDrawer extends StatelessWidget {
                   AudioSampleRateOption(streamer, streamingState),
 
 
-                  AudioChannelsOption(streamer, streamingState),
+                  Visibility(
+                      visible: Platform.isAndroid,
+                      child: AudioChannelsOption(streamer, streamingState),
+                  ),
+
 
                 ],
               );

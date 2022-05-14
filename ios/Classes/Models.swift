@@ -84,17 +84,18 @@ func !=(lhs: Resolution, rhs: Resolution) -> Bool {
 
 
 struct StreamingSettings:Codable {
-    let serviceInBackground: Bool;
+    let serviceInBackground: Bool;// not used
     var resolution: Resolution;
-    let videoFps: Int;
-    let videoBitrate: Int;
-    let h264profile:String;
-    let stabilizationMode:String;
-    let audioBitrate:Int;
-    let audioSampleRate:Int;
-    let audioChannelCount:Int;
+    var videoFps: Int;
+    var videoBitrate: Int;
+    var h264profile:String;
+    var stabilizationMode:String;
+    var audioBitrate:Int;
+    var audioSampleRate:Int;
+    var audioChannelCount:Int;// not used
     var cameraFacing: String;
-    let muteAudio: Bool;
+    
+    var muteAudio: Bool;
 }
 
 

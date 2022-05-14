@@ -85,61 +85,49 @@ class RtpService: NSObject {
              }
             
             if (!_streamingState!.isStreaming){
+                                       
+                if newValue.videoBitrate != _streamingState!.streamingSettings.videoBitrate {
+                     _streamingState!.streamingSettings.videoBitrate = newValue.videoBitrate
+                }
+                
+                if newValue.videoFps != _streamingState!.streamingSettings.videoFps {
+                     _streamingState!.streamingSettings.videoFps = newValue.videoFps
+                }
+                
+                if newValue.audioBitrate != _streamingState!.streamingSettings.audioBitrate {
+                     _streamingState!.streamingSettings.audioBitrate = newValue.audioBitrate
+                }
+                
+                if newValue.audioSampleRate != _streamingState!.streamingSettings.audioSampleRate {
+                     _streamingState!.streamingSettings.audioSampleRate = newValue.audioSampleRate
+                }
+                
+                
+                var needRestartPreview = false
+                
                 
                 
                 if (newValue.resolution != _streamingState!.streamingSettings.resolution ){
-                    _streamingState!.streamingSettings.resolution = newValue.resolution;
-                  if _streamingState!.isOnPreview {
-                      let view:MTHKView = _lfView!
-                      stopPreview();
-                      startPreview(lfView: view)
-                  }
+                    _streamingState!.streamingSettings.resolution = newValue.resolution
+                    needRestartPreview = true
                 }
-                                       
-//
-//
-//
-//                if (_streamingState!.isOnPreview){
-//                    let view:MTHKView = _lfView!
-//                    stopPreview();
-//                    startPreview(lfView: view)
-//                }
-//
+                
+                if (newValue.h264profile != _streamingState!.streamingSettings.h264profile ){
+                    _streamingState!.streamingSettings.h264profile = newValue.h264profile
+                    needRestartPreview = true
+                }
+                
+                if (newValue.stabilizationMode != _streamingState!.streamingSettings.stabilizationMode ){
+                    _streamingState!.streamingSettings.stabilizationMode = newValue.stabilizationMode
+                    needRestartPreview = true
+                }
+                
+                if needRestartPreview && _streamingState!.isOnPreview {
+                    let view:MTHKView = _lfView!
+                    stopPreview();
+                    startPreview(lfView: view)
+                }
             }
-            
-
-//
-//
-//                     if (!camera2Base!!.isStreaming ) {
-//
-//                       if (newValue.serviceInBackground!=it.serviceInBackground)
-//                         it.serviceInBackground = newValue.serviceInBackground
-//
-//                       if (newValue.videoBitrate!=it.videoBitrate)
-//                         it.videoBitrate = newValue.videoBitrate
-//
-//                       if (newValue.videoFps!=it.videoFps)
-//                         it.videoFps = newValue.videoFps
-//
-//                       if (newValue.audioBitrate!=it.audioBitrate)
-//                         it.audioBitrate = newValue.audioBitrate
-//
-//                       if (newValue.audioSampleRate!=it.audioSampleRate)
-//                         it.audioSampleRate = newValue.audioSampleRate
-//
-//                       if (newValue.audioChannelCount!=it.audioChannelCount)
-//                         it.audioChannelCount = newValue.audioChannelCount
-//
-//
-//                       if (newValue.resolution!=it.resolution ){
-//                         it.resolution = newValue.resolution
-//                         if (camera2Base!!.isOnPreview) {
-//                           stopPreview()
-//                           startPreview()
-//                         }
-//                       }
-//                     }
-            
         }
     }
     
@@ -244,15 +232,6 @@ class RtpService: NSObject {
         ]
         
         
-//        _rtmpStream.captureSettings = [
-//            .sessionPreset: AVCaptureSession.Preset.hd1280x720,
-//            .continuousAutofocus: true,
-//            .continuousExposure: true
-//            // .preferredVideoStabilizationMode: AVCaptureVideoStabilizationMode.auto
-//        ]
-        
-        
-        
         var profileLevel:CFString
 
         switch streamingSettings.h264profile {
@@ -270,18 +249,6 @@ class RtpService: NSObject {
             .width: streamingSettings.resolution.width,
             .height: streamingSettings.resolution.height,
         ]
-//        _rtmpStream.videoSettings = [
-//            .width: 720,
-//            .height: 1280
-//        ]
-        
-//        _rtmpStream.attachAudio(AVCaptureDevice.default(for: .audio)) { error in
-//            logger.warn(error.description)
-//        }
-//        _rtmpStream!.attachCamera(DeviceUtil.device(withPosition: streamingState.streamingSettings.cameraFacing == "FRONT" ? .front : .back)) { error in
-//            logger.warn(error.description)
-//
-//        }
         
         _rtmpStream!.attachAudio(AVCaptureDevice.default(for: .audio)) { error in
             logger.warn(error.description)
@@ -318,7 +285,11 @@ class RtpService: NSObject {
         }
         
         _streamingState!.isOnPreview = false
+//        _lfView!.attachStream(nil)
         _lfView = nil
+        
+        
+//        _rtmpStream.close()
         
     }
     
