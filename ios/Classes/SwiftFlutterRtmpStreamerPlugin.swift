@@ -169,7 +169,68 @@ public class SwiftFlutterRtmpStreamerPlugin: NSObject, FlutterPlugin {
 
             break;
          
+          /*
+           *
+           *
+           */
+          case "startStream":
+            
+            guard let args0 = call.arguments else {
+                result(FlutterError.init(code: call.method, message: "args is empty", details: nil))
+                return
+            }
+            
+            guard let args = args0 as? [String: Any] else {
+                result(FlutterError.init(code: call.method, message: "args is empty", details: nil))
+                return
+            }
+            
+            if let uri = args["uri"] as? String,
+               let streamName = args["streamName"] as? String
+          {
+                
+                let endpoint : String = "\(uri)/\(streamName)"
+                              
+                do {
+
+                    _rtpService.startStreaming(endpoint)
+                  
+                    result(true)
+                    
+                    _rtpService.sendCameraStatusToDart()
+                    
+
+                } catch {
+                    result(FlutterError.init(code: "startStream", message: "\(error)", details: nil))
+                }
+            } else {
+                result(FlutterError.init(code: "startStream", message: "initialParams empty", details: nil))
+            }
+
+            break;
           
+          /*
+           *
+           *
+           */
+          case "stopStream":
+          
+                            
+              do {
+
+                  _rtpService.stopStreaming()
+                
+                  result(true)
+                  
+                  _rtpService.sendCameraStatusToDart()
+                  
+
+              } catch {
+                  result(FlutterError.init(code: "stopStream", message: "\(error)", details: nil))
+              }
+
+
+            break;
 
       
         default:
