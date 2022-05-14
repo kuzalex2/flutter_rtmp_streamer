@@ -111,31 +111,106 @@ class RtpService: NSObject {
             return;
         }
         
-        _rtmpStream.captureSettings = [
-            .sessionPreset: AVCaptureSession.Preset.hd1280x720,
+        let streamingSettings = streamingState.streamingSettings
+        
+        
+        
+        let session = AVAudioSession.sharedInstance()
+        do {
+            // https://stackoverflow.com/questions/51010390/avaudiosession-setcategory-swift-4-2-ios-12-play-sound-on-silent
+            if #available(iOS 10.0, *) {
+                try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
+            } else {
+                session.perform(NSSelectorFromString("setCategory:withOptions:error:"), with: AVAudioSession.Category.playAndRecord, with: [
+                    AVAudioSession.CategoryOptions.allowBluetooth,
+                    AVAudioSession.CategoryOptions.defaultToSpeaker
+                ])
+                try session.setMode(.default)
+            }
+            try session.setActive(true)
+        } catch {
+            logger.error(error)
+            sendErrorToDart(description: "\(error)")
+        }
+        
+        let preset : AVCaptureSession.Preset = streamingSettings.resolution.toPreset()
+        
+        var stabilizationMode:AVCaptureVideoStabilizationMode
+
+        switch streamingSettings.stabilizationMode {
+            case "off": stabilizationMode = .off; break;
+            case "standard": stabilizationMode = .standard; break;
+            case "cinematic": stabilizationMode = .cinematic; break;
+            case "auto": stabilizationMode = .auto; break;
+            default:
+                stabilizationMode = .off
+                break;
+        }
+        
+
+        _rtmpStream!.captureSettings = [
+            .sessionPreset: preset,
             .continuousAutofocus: true,
-            .continuousExposure: true
-            // .preferredVideoStabilizationMode: AVCaptureVideoStabilizationMode.auto
-        ]
-        _rtmpStream.videoSettings = [
-            .width: 720,
-            .height: 1280
+            .continuousExposure: true,
+             .preferredVideoStabilizationMode: stabilizationMode
         ]
         
-        _rtmpStream.attachAudio(AVCaptureDevice.default(for: .audio)) { error in
-            logger.warn(error.description)
+        
+//        _rtmpStream.captureSettings = [
+//            .sessionPreset: AVCaptureSession.Preset.hd1280x720,
+//            .continuousAutofocus: true,
+//            .continuousExposure: true
+//            // .preferredVideoStabilizationMode: AVCaptureVideoStabilizationMode.auto
+//        ]
+        
+        
+        
+        var profileLevel:CFString
+
+        switch streamingSettings.h264profile {
+            case "baseline": profileLevel = kVTProfileLevel_H264_Baseline_AutoLevel; break;
+            case "main": profileLevel = kVTProfileLevel_H264_Main_AutoLevel; break;
+            case "high": profileLevel = kVTProfileLevel_H264_High_AutoLevel; break;
+            default:
+                profileLevel = kVTProfileLevel_H264_Baseline_AutoLevel
+            break;
         }
-        _rtmpStream!.attachCamera(DeviceUtil.device(withPosition: streamingState.streamingSettings.cameraFacing == "FRONT" ? .front : .back)) { error in
+        
+        _rtmpStream!.videoSettings = [
+            .scalingMode: ScalingMode.letterbox,
+            .profileLevel: profileLevel
+        ]
+//        _rtmpStream.videoSettings = [
+//            .width: 720,
+//            .height: 1280
+//        ]
+        
+//        _rtmpStream.attachAudio(AVCaptureDevice.default(for: .audio)) { error in
+//            logger.warn(error.description)
+//        }
+//        _rtmpStream!.attachCamera(DeviceUtil.device(withPosition: streamingState.streamingSettings.cameraFacing == "FRONT" ? .front : .back)) { error in
+//            logger.warn(error.description)
+//
+//        }
+        
+        _rtmpStream!.attachAudio(AVCaptureDevice.default(for: .audio)) { error in
             logger.warn(error.description)
+            self.sendErrorToDart(description: "\(error)")
+        }
+                
+        
+        _rtmpStream!.captureSettings[.isVideoMirrored] = streamingSettings.cameraFacing == "FRONT"
+        _rtmpStream!.attachCamera(DeviceUtil.device(withPosition: streamingSettings.cameraFacing == "FRONT" ? .front : .back)) { error in
             
+            self.sendErrorToDart(description: "\(error)")
         }
        
-//        _rtmpStream.addObserver(self, forKeyPath: "currentFPS", options: .new, context: nil)
         lfView.attachStream(_rtmpStream)
         
         
         _streamingState!.isOnPreview = true;
-        _streamingState!.resolution = Resolution(width: 1280, height: 720)
+        _streamingState!.resolution =  streamingSettings.resolution
+        
         _streamingState!.cameraOrientation = 90
         sendCameraStatusToDart()
         

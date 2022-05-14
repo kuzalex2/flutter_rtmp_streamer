@@ -158,7 +158,7 @@ class StreamingSettings extends Equatable {
     videoFps:30,
     videoBitrate: 1024 * 1024,
     h264profile: "main",
-    stabilizationMode: "auto",
+    stabilizationMode: "off",
     audioBitrate: -1,
     audioSampleRate: -1,
     audioChannelCount: 2,
