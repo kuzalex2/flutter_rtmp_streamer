@@ -193,7 +193,7 @@ public class SwiftFlutterRtmpStreamerPlugin: NSObject, FlutterPlugin {
                               
                 do {
 
-                    _rtpService.startStreaming(endpoint)
+                    _rtpService.startStreaming(uri: uri, streamName: streamName)
                   
                     result(true)
                     

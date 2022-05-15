@@ -26,6 +26,9 @@ class RtpService: NSObject {
     private var _rtmpStream: RTMPStream!
     private var _lfView: MTHKView?
     
+    private var _uri: String = ""
+    private var _streamName: String = ""
+    
     private func sendErrorToDart(description: String) {
     
         _dartMessenger.send(eventType: "Notification", args: ["description":description])
@@ -246,8 +249,8 @@ class RtpService: NSObject {
         _rtmpStream!.videoSettings = [
             .scalingMode: ScalingMode.letterbox,
             .profileLevel: profileLevel,
-            .width: streamingSettings.resolution.width,
-            .height: streamingSettings.resolution.height,
+            .width: streamingSettings.resolution.height,
+            .height: streamingSettings.resolution.width,
         ]
         
         _rtmpStream!.attachAudio(AVCaptureDevice.default(for: .audio)) { error in
@@ -295,10 +298,47 @@ class RtpService: NSObject {
     }
     
     
-    func startStreaming() {
+    func startStreaming(uri:String, streamName: String) {
+
+        
         guard let streamingState = _streamingState else {
             return
         }
+        
+        if (streamingState.isStreaming) {
+            return;
+        }
+        
+        let streamingSettings = streamingState.streamingSettings
+        
+        
+        
+        _rtmpStream!.audioSettings = [
+            .bitrate: streamingSettings.audioBitrate == -1 ? 32 * 1024 :  streamingSettings.audioBitrate,
+            .sampleRate: streamingSettings.audioSampleRate == -1 ? 0 : streamingSettings.audioSampleRate,
+        ]
+        
+        _rtmpStream!.videoSettings = [
+            .bitrate : streamingSettings.videoBitrate,
+//            .maxKeyFrameIntervalDuration : _initialParams!.keyframeInterval,
+        ]
+
+        _rtmpStream!.captureSettings[.fps] = streamingSettings.videoFps
+        
+        
+//        _rtmpStream!.audioSettings = [
+//            .muted :muteAudio
+//        ]
+        
+        
+        
+        _uri = uri;
+        _streamName = streamName;
+        
+        _rtmpConnection.addEventListener(.rtmpStatus, selector: #selector(rtmpStatusHandler), observer: self)
+//        _rtmpConnection?.addEventListener(.ioError, selector: #selector(rtmpErrorHandler), observer: self)
+//        _retryCount = 0
+        _rtmpConnection.connect(_uri)
         
     }
     
@@ -307,6 +347,74 @@ class RtpService: NSObject {
             return
         }
         
+    }
+    
+    
+    
+    @objc
+    private func rtmpStatusHandler(_ notification: Notification) {
+        let e = Event.from(notification)
+        guard let data: ASObject = e.data as? ASObject, let code: String = data["code"] as? String else {
+            return
+        }
+        logger.info("rtmpStatusHandler status \(code)")
+        switch code {
+      
+            
+        case RTMPConnection.Code.connectSuccess.rawValue:
+
+            _rtmpStream?.publish(_streamName)
+            
+        case RTMPConnection.Code.connectFailed.rawValue,
+             RTMPConnection.Code.connectClosed.rawValue:
+
+//            _cameraValue?.isRtmpConnected = false
+//            outputChannelsSendUpdateStatus(errorDescription: code)
+            
+//            guard _retryCount <= CameraView.maxRetryCount else {
+//                _cameraValue?.isStreaming = false
+//                outputChannelsSendUpdateStatus()
+//                return
+//            }
+            
+//            Thread.sleep(forTimeInterval: min(8, pow(2.0, Double(_retryCount))))
+           
+            _rtmpConnection.connect(_uri)
+//            _retryCount += 1
+            break;
+        case RTMPStream.Code.publishBadName.rawValue:
+            
+            _rtmpConnection.close()
+            
+//            _cameraValue?.isRtmpConnected = false
+//            outputChannelsSendUpdateStatus(errorDescription: code)
+
+//            guard _retryCount <= CameraView.maxRetryCount else {
+//                _cameraValue?.isStreaming = false
+//                outputChannelsSendUpdateStatus()
+//                return
+//            }
+
+//            Thread.sleep(forTimeInterval: min(8, pow(2.0, Double(_retryCount))))
+          
+            _rtmpConnection.connect(_uri)
+//            _retryCount += 1
+            break;
+        case RTMPStream.Code.publishStart.rawValue:
+//            _cameraValue?.isRtmpConnected = true
+//            outputChannelsSendUpdateStatus()
+            
+                        
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
+//                if (self?._cameraValue?.isRtmpConnected ?? false){
+//                    self?._retryCount = 0
+//                }
+//            }
+            break;
+        default:
+//            outputChannelsSendUpdateStatus(errorDescription: code)
+            break
+        }
     }
     
 }
