@@ -67,73 +67,6 @@ class RtpService: NSObject {
         super.init()
     }
     
-    func setStreamingSettings(newValue: StreamingSettings) {
-        if (_streamingState == nil){
-            _streamingState = StreamingState(
-                isStreaming: false,
-                isOnPreview: false,
-                isAudioMuted: false,
-                isRtmpConnected: false,
-                streamResolution: Resolution(width: 1, height: 1),
-                resolution: Resolution(width: 1, height: 1),
-                cameraOrientation: 1,
-                streamingSettings: newValue
-            )
-            
-            _rtmpStream = RTMPStream(connection: _rtmpConnection)
-        } else {
-           
-            if (newValue.cameraFacing != _streamingState!.streamingSettings.cameraFacing){
-               switchCamera()
-             }
-            
-            if (!_streamingState!.isStreaming){
-                                       
-                if newValue.videoBitrate != _streamingState!.streamingSettings.videoBitrate {
-                     _streamingState!.streamingSettings.videoBitrate = newValue.videoBitrate
-                }
-                
-                if newValue.videoFps != _streamingState!.streamingSettings.videoFps {
-                     _streamingState!.streamingSettings.videoFps = newValue.videoFps
-                }
-                
-                if newValue.audioBitrate != _streamingState!.streamingSettings.audioBitrate {
-                     _streamingState!.streamingSettings.audioBitrate = newValue.audioBitrate
-                }
-                
-                if newValue.audioSampleRate != _streamingState!.streamingSettings.audioSampleRate {
-                     _streamingState!.streamingSettings.audioSampleRate = newValue.audioSampleRate
-                }
-                
-                
-                var needRestartPreview = false
-                
-                
-                
-                if (newValue.resolution != _streamingState!.streamingSettings.resolution ){
-                    _streamingState!.streamingSettings.resolution = newValue.resolution
-                    needRestartPreview = true
-                }
-                
-                if (newValue.h264profile != _streamingState!.streamingSettings.h264profile ){
-                    _streamingState!.streamingSettings.h264profile = newValue.h264profile
-                    needRestartPreview = true
-                }
-                
-                if (newValue.stabilizationMode != _streamingState!.streamingSettings.stabilizationMode ){
-                    _streamingState!.streamingSettings.stabilizationMode = newValue.stabilizationMode
-                    needRestartPreview = true
-                }
-                
-                if needRestartPreview && _streamingState!.isOnPreview {
-                    let view:MTHKView = _lfView!
-                    stopPreview();
-                    startPreview(lfView: view)
-                }
-            }
-        }
-    }
-    
     func sendCameraStatusToDart() {
         
         guard let streamingState = _streamingState else {
@@ -154,40 +87,42 @@ class RtpService: NSObject {
         }
     }
     
-    func switchCamera() {
-        
-        if _streamingState != nil {
+    
+    func setStreamingSettings(newValue: StreamingSettings) {
+        if (_streamingState == nil){
+            _streamingState = StreamingState(
+                isStreaming: false,
+                isOnPreview: false,
+                isAudioMuted: newValue.muteAudio,
+                isRtmpConnected: false,
+                streamResolution: Resolution(width: 1, height: 1),
+                resolution: Resolution(width: 1, height: 1),
+                cameraOrientation: 1,
+                streamingSettings: newValue
+            )
             
-            if _streamingState!.isOnPreview || _streamingState!.isStreaming {
-               
-                let newCameraFacing = _streamingState!.streamingSettings.cameraFacing == "FRONT" ? "BACK" : "FRONT"
-
-                let prevVideoIsMirrored = _rtmpStream!.captureSettings[.isVideoMirrored]
+            _rtmpStream = RTMPStream(connection: _rtmpConnection)
+            
+            setupSession()
+            
+        } else {
+            
+            if (true || !_streamingState!.isStreaming){
                 
-
-                _rtmpStream!.captureSettings[.isVideoMirrored] = newCameraFacing == "FRONT"
-
-                _rtmpStream!.attachCamera(DeviceUtil.device(withPosition: newCameraFacing == "FRONT" ? .front : .back)) { error in
-
-                    self._rtmpStream!.captureSettings[.isVideoMirrored] = prevVideoIsMirrored
-                    return
+                if (newValue != _streamingState!.streamingSettings){
+                
+                    _streamingState!.streamingSettings = newValue
+                    _streamingState!.isAudioMuted = _streamingState!.streamingSettings.muteAudio
+                    setupSession()
                 }
-                
-                _streamingState!.streamingSettings.cameraFacing = newCameraFacing
             }
         }
-        
     }
     
     
-    
-    func startPreview(lfView: MTHKView) {
+    func setupSession() {
         guard let streamingState = _streamingState else {
             return
-        }
-        
-        if (streamingState.isOnPreview) {
-            return;
         }
         
         let streamingSettings = streamingState.streamingSettings
@@ -231,7 +166,8 @@ class RtpService: NSObject {
             .sessionPreset: preset,
             .continuousAutofocus: true,
             .continuousExposure: true,
-            .preferredVideoStabilizationMode: stabilizationMode
+            .preferredVideoStabilizationMode: stabilizationMode,
+            .fps: streamingSettings.videoFps
         ]
         
         
@@ -251,7 +187,17 @@ class RtpService: NSObject {
             .profileLevel: profileLevel,
             .width: streamingSettings.resolution.height,
             .height: streamingSettings.resolution.width,
+            .bitrate : streamingSettings.videoBitrate,
         ]
+        
+        
+        
+        _rtmpStream!.audioSettings = [
+            .bitrate: streamingSettings.audioBitrate == -1 ? 32 * 1024 :  streamingSettings.audioBitrate,
+            .sampleRate: streamingSettings.audioSampleRate == -1 ? 0 : streamingSettings.audioSampleRate,
+            .muted: streamingSettings.muteAudio
+        ]
+
         
         _rtmpStream!.attachAudio(AVCaptureDevice.default(for: .audio)) { error in
             logger.warn(error.description)
@@ -264,17 +210,30 @@ class RtpService: NSObject {
             
             self.sendErrorToDart(description: "\(error)")
         }
-       
-        _lfView = lfView
-        _lfView!.attachStream(_rtmpStream)
         
         
-        _streamingState!.isOnPreview = true;
         _streamingState!.resolution =  streamingSettings.resolution
-        
+        _streamingState!.streamResolution =  streamingSettings.resolution
         _streamingState!.cameraOrientation = 90
+        
         sendCameraStatusToDart()
         
+    }
+
+    
+    
+    func startPreview(lfView: MTHKView) {
+        guard let streamingState = _streamingState else {
+            return
+        }
+        
+        if (!streamingState.isOnPreview) {
+            _lfView = lfView
+            _lfView!.attachStream(_rtmpStream)
+        
+            _streamingState!.isOnPreview = true;
+            sendCameraStatusToDart()
+        }
     }
     
     func stopPreview() {
@@ -283,70 +242,62 @@ class RtpService: NSObject {
             return
         }
         
-        if (!streamingState.isOnPreview) {
-            return;
+        if (streamingState.isOnPreview) {
+            _lfView!.attachStream(nil)
+            _lfView = nil
+        
+            _streamingState!.isOnPreview = false;
+            sendCameraStatusToDart()
         }
-        
-        _streamingState!.isOnPreview = false
-//        _lfView!.attachStream(nil)
-        _lfView = nil
-        
-        
 //        _rtmpStream.close()
 //        _rtmpConnection.close()
-        
     }
     
     
     func startStreaming(uri:String, streamName: String) {
-
         
+        guard let streamingState = _streamingState else {
+            return
+        }
+        
+        if (!streamingState.isStreaming) {
+            
+            _uri = uri;
+            _streamName = streamName;
+            
+            _rtmpConnection.addEventListener(.rtmpStatus, selector: #selector(rtmpStatusHandler), observer: self)
+    //        _rtmpConnection?.addEventListener(.ioError, selector: #selector(rtmpErrorHandler), observer: self)
+    //        _retryCount = 0
+            _rtmpConnection.connect(_uri)
+        
+            _streamingState!.isStreaming = true;
+            sendCameraStatusToDart()
+        }
+        
+    }
+    
+    func stopStreaming() {
+
         guard let streamingState = _streamingState else {
             return
         }
         
         if (streamingState.isStreaming) {
-            return;
+            
+            _streamingState!.isRtmpConnected = false
+            _streamingState!.isStreaming = false
+            _rtmpConnection.close()
+            
+            _rtmpConnection.removeEventListener(.rtmpStatus, selector: #selector(rtmpStatusHandler), observer: self)
+//            _rtmpConnection.removeEventListener(.ioError, selector: #selector(rtmpErrorHandler), observer: self)
+            
+            
+            sendCameraStatusToDart()
         }
         
-        let streamingSettings = streamingState.streamingSettings
-        
-        
-        
-        _rtmpStream!.audioSettings = [
-            .bitrate: streamingSettings.audioBitrate == -1 ? 32 * 1024 :  streamingSettings.audioBitrate,
-            .sampleRate: streamingSettings.audioSampleRate == -1 ? 0 : streamingSettings.audioSampleRate,
-        ]
-        
-        _rtmpStream!.videoSettings = [
-            .bitrate : streamingSettings.videoBitrate,
-//            .maxKeyFrameIntervalDuration : _initialParams!.keyframeInterval,
-        ]
-
-        _rtmpStream!.captureSettings[.fps] = streamingSettings.videoFps
-        
-        
-//        _rtmpStream!.audioSettings = [
-//            .muted :muteAudio
-//        ]
-        
-        
-        
-        _uri = uri;
-        _streamName = streamName;
-        
-        _rtmpConnection.addEventListener(.rtmpStatus, selector: #selector(rtmpStatusHandler), observer: self)
-//        _rtmpConnection?.addEventListener(.ioError, selector: #selector(rtmpErrorHandler), observer: self)
-//        _retryCount = 0
-        _rtmpConnection.connect(_uri)
-        
-    }
-    
-    func stopStreaming() {
-        guard let streamingState = _streamingState else {
-            return
-        }
-        
+//        _rtmpStream?.close()
+//        _rtmpStream?.dispose()
+//        _rtmpConnection?.close()
     }
     
     
@@ -368,8 +319,9 @@ class RtpService: NSObject {
         case RTMPConnection.Code.connectFailed.rawValue,
              RTMPConnection.Code.connectClosed.rawValue:
 
-//            _cameraValue?.isRtmpConnected = false
-//            outputChannelsSendUpdateStatus(errorDescription: code)
+            _streamingState?.isRtmpConnected = false
+            sendCameraStatusToDart()
+            sendErrorToDart(description: code)
             
 //            guard _retryCount <= CameraView.maxRetryCount else {
 //                _cameraValue?.isStreaming = false
@@ -386,8 +338,9 @@ class RtpService: NSObject {
             
             _rtmpConnection.close()
             
-//            _cameraValue?.isRtmpConnected = false
-//            outputChannelsSendUpdateStatus(errorDescription: code)
+            _streamingState?.isRtmpConnected = false
+            sendCameraStatusToDart()
+            sendErrorToDart(description: code)
 
 //            guard _retryCount <= CameraView.maxRetryCount else {
 //                _cameraValue?.isStreaming = false
@@ -401,9 +354,8 @@ class RtpService: NSObject {
 //            _retryCount += 1
             break;
         case RTMPStream.Code.publishStart.rawValue:
-//            _cameraValue?.isRtmpConnected = true
-//            outputChannelsSendUpdateStatus()
-            
+            _streamingState?.isRtmpConnected = true
+            sendCameraStatusToDart()
                         
 //            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
 //                if (self?._cameraValue?.isRtmpConnected ?? false){
@@ -412,7 +364,7 @@ class RtpService: NSObject {
 //            }
             break;
         default:
-//            outputChannelsSendUpdateStatus(errorDescription: code)
+            sendErrorToDart(description: code)
             break
         }
     }

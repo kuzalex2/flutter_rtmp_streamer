@@ -28,7 +28,7 @@ class CameraView: NSObject, FlutterPlatformView {
         rtpService: RtpService
     ) {
         _view = CameraEmbedView()
-        _view.backgroundColor = UIColor.blue
+        _view.backgroundColor = UIColor.black
         _rtpService = rtpService
         
         _rtpService.startPreview(lfView: _view.glView!);

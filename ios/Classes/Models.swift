@@ -66,12 +66,6 @@ struct Resolution: Codable {
         return AVCaptureSession.Preset.vga640x480;
         
     }
-    
-    
-//    static func ==(lhs: Resolution, rhs: Resolution) -> Bool {
-//        return lhs.width == rhs.width && lhs.height == rhs.height
-//    }
-    
 }
 
 func ==(lhs: Resolution, rhs: Resolution) -> Bool {
@@ -96,6 +90,23 @@ struct StreamingSettings:Codable {
     var cameraFacing: String;
     
     var muteAudio: Bool;
+}
+
+func ==(lhs: StreamingSettings, rhs: StreamingSettings) -> Bool {
+    return lhs.resolution == rhs.resolution
+        && lhs.videoFps == rhs.videoFps
+        && lhs.serviceInBackground == rhs.serviceInBackground
+        && lhs.videoBitrate == rhs.videoBitrate
+        && lhs.h264profile == rhs.h264profile
+        && lhs.stabilizationMode == rhs.stabilizationMode
+        && lhs.audioBitrate == rhs.audioBitrate
+        && lhs.audioSampleRate == rhs.audioSampleRate
+        && lhs.audioChannelCount == rhs.audioChannelCount
+        && lhs.cameraFacing == rhs.cameraFacing
+        && lhs.muteAudio == rhs.muteAudio
+}
+func !=(lhs: StreamingSettings, rhs: StreamingSettings) -> Bool {
+    return !(lhs == rhs)
 }
 
 
