@@ -26,6 +26,10 @@ class RtpService: NSObject {
     private var _rtmpStream: RTMPStream!
     private var _lfView: MTHKView?
     
+    private static let MAX_RETRY_COUNT: Int = 10
+    
+    
+    private var _retryCount:Int = 0
     private var _uri: String = ""
     private var _streamName: String = ""
     
@@ -264,10 +268,10 @@ class RtpService: NSObject {
             
             _uri = uri;
             _streamName = streamName;
+            _retryCount = 0;
             
             _rtmpConnection.addEventListener(.rtmpStatus, selector: #selector(rtmpStatusHandler), observer: self)
     //        _rtmpConnection?.addEventListener(.ioError, selector: #selector(rtmpErrorHandler), observer: self)
-    //        _retryCount = 0
             _rtmpConnection.connect(_uri)
         
             _streamingState!.isStreaming = true;
@@ -323,16 +327,16 @@ class RtpService: NSObject {
             sendCameraStatusToDart()
             sendErrorToDart(description: code)
             
-//            guard _retryCount <= CameraView.maxRetryCount else {
-//                _cameraValue?.isStreaming = false
-//                outputChannelsSendUpdateStatus()
-//                return
-//            }
+            guard _retryCount <= RtpService.MAX_RETRY_COUNT else {
+                _streamingState?.isStreaming = false
+                sendCameraStatusToDart()
+                return
+            }
             
-//            Thread.sleep(forTimeInterval: min(8, pow(2.0, Double(_retryCount))))
+            Thread.sleep(forTimeInterval: min(8, pow(2.0, Double(_retryCount))))
            
             _rtmpConnection.connect(_uri)
-//            _retryCount += 1
+            _retryCount += 1
             break;
         case RTMPStream.Code.publishBadName.rawValue:
             
@@ -342,26 +346,26 @@ class RtpService: NSObject {
             sendCameraStatusToDart()
             sendErrorToDart(description: code)
 
-//            guard _retryCount <= CameraView.maxRetryCount else {
-//                _cameraValue?.isStreaming = false
-//                outputChannelsSendUpdateStatus()
-//                return
-//            }
+            guard _retryCount <= RtpService.MAX_RETRY_COUNT else {
+                _streamingState?.isStreaming = false
+                sendCameraStatusToDart()
+                return
+            }
 
-//            Thread.sleep(forTimeInterval: min(8, pow(2.0, Double(_retryCount))))
+            Thread.sleep(forTimeInterval: min(8, pow(2.0, Double(_retryCount))))
           
             _rtmpConnection.connect(_uri)
-//            _retryCount += 1
+            _retryCount += 1
             break;
         case RTMPStream.Code.publishStart.rawValue:
             _streamingState?.isRtmpConnected = true
             sendCameraStatusToDart()
                         
-//            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
-//                if (self?._cameraValue?.isRtmpConnected ?? false){
-//                    self?._retryCount = 0
-//                }
-//            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
+                if (self?._streamingState?.isRtmpConnected ?? false){
+                    self?._retryCount = 0
+                }
+            }
             break;
         default:
             sendErrorToDart(description: code)
