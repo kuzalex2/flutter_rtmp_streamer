@@ -2,6 +2,10 @@ PODS:
   - Flutter (1.0.0)
   - flutter_rtmp_streamer (0.0.1):
     - Flutter
+    - HaishinKit (~> 1.2.3)
+  - HaishinKit (1.2.3):
+    - Logboard (~> 2.2.2)
+  - Logboard (2.2.2)
   - "permission_handler (5.1.0+2)":
     - Flutter
   - shared_preferences_ios (0.0.1):
@@ -15,6 +19,11 @@ DEPENDENCIES:
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
   - shared_preferences_ios (from `.symlinks/plugins/shared_preferences_ios/ios`)
   - wakelock (from `.symlinks/plugins/wakelock/ios`)
+
+SPEC REPOS:
+  trunk:
+    - HaishinKit
+    - Logboard
 
 EXTERNAL SOURCES:
   Flutter:
@@ -30,7 +39,9 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
-  flutter_rtmp_streamer: bff56af51bd86606786d6e24ed95570e851f0482
+  flutter_rtmp_streamer: 98b51ad838902da16deb0832771263ca1d6d0e9a
+  HaishinKit: abf62d8ed7fc380c97a96077a0e37c7f79e69e08
+  Logboard: 0ab6bbd984ed032b3f0b615cef06779a73445c80
   permission_handler: ccb20a9fad0ee9b1314a52b70b76b473c5f8dab0
   shared_preferences_ios: 548a61f8053b9b8a49ac19c1ffbc8b92c50d68ad
   wakelock: d0fc7c864128eac40eba1617cb5264d9c940b46f
