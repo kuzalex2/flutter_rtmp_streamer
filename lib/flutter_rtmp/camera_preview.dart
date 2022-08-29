@@ -35,20 +35,9 @@ class _FlutterRtmpCameraPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var aspectRatio = 1.0;
-    if (state.cameraOrientation == 0 || state.cameraOrientation == 180){
-      if (state.resolution.height != 0) {
-        aspectRatio = state.resolution
-            .width / state.resolution.height;
-      }
-    } else {
-      if (state.resolution.width != 0) {
-        aspectRatio = state.resolution
-            .height / state.resolution.width;
-      }
-    }
+
     return AspectRatio(
-        aspectRatio: aspectRatio,
+        aspectRatio: state.aspectRatio,
         child: const FlutterRtmpCameraView()
     );
   }
