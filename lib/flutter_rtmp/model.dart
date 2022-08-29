@@ -50,6 +50,21 @@ class StreamingState extends Equatable {
   final Resolution resolution;
   final int cameraOrientation;
 
+  double get aspectRatio {
+    if (cameraOrientation == 0 || cameraOrientation == 180){
+      if (resolution.height != 0) {
+        return resolution
+            .width / resolution.height;
+      }
+    } else {
+      if (resolution.width != 0) {
+        return resolution
+            .height / resolution.width;
+      }
+    }
+    return 1.0;
+  }
+
   final StreamingSettings streamingSettings;
 
   @JsonKey(ignore: true)
