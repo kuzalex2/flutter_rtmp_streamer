@@ -189,10 +189,13 @@ class RtpService: NSObject {
         _rtmpStream!.videoSettings = [
             .scalingMode: ScalingMode.letterbox,
             .profileLevel: profileLevel,
-            .width: streamingSettings.resolution.height,
-            .height: streamingSettings.resolution.width,
             .bitrate : streamingSettings.videoBitrate,
         ]
+        
+        
+        
+        _onOrientationChange()
+        NotificationCenter.default.addObserver(self, selector: #selector(_onOrientationChange(_:)), name: UIDevice.orientationDidChangeNotification, object: nil)
         
         
         
@@ -216,13 +219,71 @@ class RtpService: NSObject {
         }
         
         
-        _streamingState!.resolution =  streamingSettings.resolution
-        _streamingState!.streamResolution =  streamingSettings.resolution
-        _streamingState!.cameraOrientation = 90
+       
         
         sendCameraStatusToDart()
         
     }
+    
+    @objc
+    private func _onOrientationChange(_ notification: Notification) {
+        
+        _onOrientationChange()
+        sendCameraStatusToDart()
+        
+    }
+    
+    private func _onOrientationChange() {
+        guard let orientation = DeviceUtil.videoOrientation(by: UIApplication.shared.statusBarOrientation) else {
+            return
+        }
+        
+        guard let streamingState = _streamingState else {
+            return
+        }
+        
+        let streamingSettings = streamingState.streamingSettings
+        
+        
+        if (UIApplication.shared.statusBarOrientation == UIInterfaceOrientation.portrait ||  UIApplication.shared.statusBarOrientation == UIInterfaceOrientation.unknown) {
+            _rtmpStream!.videoSettings = [
+                .width: streamingSettings.resolution.height,
+                .height: streamingSettings.resolution.width,
+            ];
+            _streamingState!.cameraOrientation = 90
+
+        } else if (UIApplication.shared.statusBarOrientation == UIInterfaceOrientation.portraitUpsideDown) {
+            _rtmpStream!.videoSettings = [
+                .width: streamingSettings.resolution.height,
+                .height: streamingSettings.resolution.width,
+            ];
+            _streamingState!.cameraOrientation = 270
+
+        } else if (UIApplication.shared.statusBarOrientation == UIInterfaceOrientation.landscapeLeft) {
+            _rtmpStream!.videoSettings = [
+                .width: streamingSettings.resolution.width,
+                .height: streamingSettings.resolution.height,
+               
+            ];
+            _streamingState!.cameraOrientation = 180
+
+        } else if (UIApplication.shared.statusBarOrientation == UIInterfaceOrientation.landscapeRight) {
+            
+            _rtmpStream!.videoSettings = [
+                .width: streamingSettings.resolution.width,
+                .height: streamingSettings.resolution.height,
+               
+            ];
+            _streamingState!.cameraOrientation = 0
+
+        }
+            
+            
+        _rtmpStream.orientation = orientation
+        
+        _streamingState!.resolution =  streamingSettings.resolution
+        _streamingState!.streamResolution =  streamingSettings.resolution
+       }
 
     
     

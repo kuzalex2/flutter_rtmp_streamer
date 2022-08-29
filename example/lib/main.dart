@@ -69,34 +69,36 @@ class _MainScreenState extends State<MainScreen> {
 
           NotificationListener(streamer: widget.streamer),
 
-          Center(
-            child: Container(
-              decoration: const BoxDecoration(
-                  color: Colors.white30,
-                  borderRadius: BorderRadius.all(Radius.circular(20))
-              ),
-              width: MediaQuery.of(context).size.width,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
+          SafeArea(
+            child: Center(
+              child: Container(
+                decoration: const BoxDecoration(
+                    color: Colors.white30,
+                    borderRadius: BorderRadius.all(Radius.circular(20))
+                ),
+                width: MediaQuery.of(context).size.width,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
 
-                  Row(children: [
-                    const Spacer(),
-                    LeftControlBox(streamer: widget.streamer),
-                    const Spacer(),
-                    RightControlBox(streamer: widget.streamer),
-                    const Spacer(),
-                  ]),
-                  ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          showPreview = !showPreview;
-                        });
+                    Row(children: [
+                      const Spacer(),
+                      LeftControlBox(streamer: widget.streamer),
+                      const Spacer(),
+                      RightControlBox(streamer: widget.streamer),
+                      const Spacer(),
+                    ]),
+                    ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            showPreview = !showPreview;
+                          });
 
-                      },
-                      child: const Text("Stop/Start Preview Test")
-                  ),
-                ],
+                        },
+                        child: const Text("Stop/Start Preview Test")
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

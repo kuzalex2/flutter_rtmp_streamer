@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -72,9 +74,11 @@ class FlutterRtmpStreamer with WakeLock  {
 
   FlutterRtmpStreamer._() : _state = StreamingState.empty {
 
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
+    if (!Platform.isIOS) {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+      ]);
+    }
 
 
 
